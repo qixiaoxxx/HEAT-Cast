@@ -8,5 +8,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
+    <color name="cast_color_FFFFFF">#FFFFFF</color>">
     <color name="cast_color_F1F1F1">#F1F1F1</color>">
+    <color name="cast_color_232323">#232323</color>">
 </resources>

@@ -1,11 +1,19 @@
 package com.example.heatcast.ui
 
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.compose.ui.geometry.isEmpty
+import androidx.core.content.ContextCompat
+import androidx.core.content.getSystemService
 import com.example.heatcast.BaseDataBindingActivity
 import com.example.heatcast.R
 import com.example.heatcast.databinding.ActivityMainBinding
@@ -14,6 +22,8 @@ import com.waxrain.droidsender.delegate.Global
 import com.waxrain.ui.WaxPlayer
 import com.waxrain.utils.Config
 import dagger.hilt.android.AndroidEntryPoint
+import android.Manifest
+import androidx.activity.result.contract.ActivityResultContracts
 
 @AndroidEntryPoint
 class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
@@ -28,6 +38,18 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
 
         initSdk()
         startSdk()
+
+
+        // 1. 获取并显示设备名称
+        val deviceName = getDeviceName()
+        Log.d("DeviceInfo", "设备名称: $deviceName")
+        // 假设你的 activity_main.xml 中有一个叫 tv_device_name 的 TextView
+        binding.tvDeviceName.text = deviceName // 使用 ViewBinding 更新 UI
+
+        // 2. 请求权限以获取 Wi-Fi 名称
+        askForLocationPermission()
+
+
     }
 
 
@@ -172,6 +194,78 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         Toast.makeText(this, "CAST start", Toast.LENGTH_LONG)
 
     }
+
+    fun getWifiName(context: Context): String? {
+        // 检查是否拥有位置权限
+        if (ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return "权限不足"
+        }
+
+        val connectivityManager =
+            context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return null // 获取当前活动的网络
+        val networkCapabilities = connectivityManager.getNetworkCapabilities(network) ?: return null
+
+        // 检查是否是 Wi-Fi 网络
+        if (networkCapabilities.hasTransport(android.net.NetworkCapabilities.TRANSPORT_WIFI)) {
+            val wifiManager =
+                context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+
+            // Android 10 (API 29) 及以上，使用 NetworkCapabilities 获取 SSID
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                // 从网络能力中直接获取 Wi-Fi 信息
+                val wifiInfo = networkCapabilities.transportInfo as? android.net.wifi.WifiInfo
+                // WifiInfo.getSSID() 返回的 SSID 带有双引号，需要移除
+                return wifiInfo?.ssid?.trim { it == '"' }
+            } else {
+                // 旧版本 Android 的方法
+                @Suppress("DEPRECATION")
+                val connectionInfo = wifiManager.connectionInfo
+                if (connectionInfo != null && !TextUtils.isEmpty(connectionInfo.ssid)) {
+                    // 同样，移除双引号
+                    return connectionInfo.ssid.trim { it == '"' }
+                }
+            }
+        }
+
+        return null // 如果不是 Wi-Fi 连接，返回 null
+    }
+
+    // 在你的 Activity 或 Fragment 中
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                // 权限已授予，现在可以获取 Wi-Fi 名称了
+                val wifiName = getWifiName(this) // 传入 Context
+                Log.d("WifiInfo", "Wi-Fi 名称: $wifiName")
+                binding.tvWifiName.text = wifiName
+            } else {
+                // 权限被拒绝，向用户解释为什么你需要这个权限
+                Log.d("WifiInfo", "位置权限被拒绝，无法获取 Wi-Fi 名称")
+            }
+        }
+
+    fun askForLocationPermission() {
+        // 请求精确位置权限
+        requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
+
+    // 将这个函数添加到 MainActivity 类的外部或内部都可以
+
+    // 建议将 getDeviceName 放在类的外面，作为一个顶层函数
+    fun getDeviceName(): String {
+        val manufacturer = Build.MANUFACTURER
+        val model = Build.MODEL
+        if (model.lowercase().startsWith(manufacturer.lowercase())) {
+            return model
+        }
+        return "$manufacturer $model"
+    }
+
 
     override fun onRestart() {
         super.onRestart()
