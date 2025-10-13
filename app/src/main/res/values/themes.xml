@@ -2,4 +2,20 @@
 <resources>
 
     <style name="Theme.HEATCast" parent="android:Theme.Material.Light.NoActionBar" />
+
+
+    <style name="AppTheme" parent="android:Theme.Light">
+        <item name="android:windowBackground">@drawable/tiffany</item>
+        <item name="colorPrimary">@color/purple_200</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="windowActionBar">false</item>
+        <!--        防止系统键盘自动弹出-->
+        <item name="android:windowSoftInputMode">stateAlwaysHidden</item>
+
+        <item name="selectableItemBackground">@null</item>
+    </style>
+
+
 </resources>
