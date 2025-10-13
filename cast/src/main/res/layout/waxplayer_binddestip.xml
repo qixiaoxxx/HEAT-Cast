@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+	android:background="@drawable/dialog_bg"
+    android:orientation="vertical" >
+
+	<TextView
+        android:id="@+id/binddestip_title_text"
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/title_large"
+		android:background="@drawable/dialog_bg_title"
+		android:gravity="center_vertical"
+		android:textColor="#FFFFFF"
+		android:paddingLeft="@dimen/margin"
+		android:textSize="@dimen/tsize_large"
+		android:ellipsize="marquee"
+		android:singleLine="true"
+        android:text="TITLE" />
+
+	<ImageView
+		android:id="@+id/binddestip_qrcode" 
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+		android:layout_marginLeft="3dp"
+		android:layout_marginRight="3dp"
+		android:layout_marginTop="3dp"
+		android:layout_marginBottom="3dp" />
+
+</LinearLayout>

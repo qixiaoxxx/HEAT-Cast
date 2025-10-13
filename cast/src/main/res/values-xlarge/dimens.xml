@@ -1,0 +1,19 @@
+<resources>
+
+    <dimen name="tsize_smallest">14sp</dimen>
+    <dimen name="tsize_small">22sp</dimen>
+    <dimen name="tsize_medium">24sp</dimen>
+    <dimen name="tsize_large">26sp</dimen>
+    <dimen name="title_medium">36sp</dimen>
+    <dimen name="title_large">39sp</dimen>
+    <dimen name="dlg_button">46sp</dimen>
+    <dimen name="margin">9sp</dimen>
+    <dimen name="margin2">5sp</dimen>
+    <dimen name="scanover_margin">7px</dimen>
+    <dimen name="playctlbtn">44sp</dimen>
+    <dimen name="adview_width">400px</dimen>
+    <dimen name="adview_height">400px</dimen>
+    <dimen name="metaview_width">540px</dimen>
+    <dimen name="metaview_height">540px</dimen>
+
+</resources>

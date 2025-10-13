@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/layout_toast_root"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+    android:background="@drawable/toast_bg_hws"
+	android:orientation="vertical" 
+	android:paddingLeft="30dip"
+	android:paddingRight="30dip"
+	android:gravity="center" >
+
+	<LinearLayout
+		android:id="@+id/layout_toast"
+		android:orientation="vertical" 
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content" >
+
+		<LinearLayout
+			android:orientation="horizontal"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_horizontal"
+			android:paddingTop="6dip"
+			android:gravity="center" >
+
+			<ImageView 
+				android:id="@+id/iv_toast"
+				android:layout_width="@dimen/title_large" 
+				android:layout_height="@dimen/title_large" 
+				android:visibility="gone"
+				android:src="@drawable/logo" />
+			<ImageView 
+				android:layout_width="@dimen/title_large" 
+				android:layout_height="@dimen/title_large" 
+				android:src="@drawable/logo_hws" />
+			<TextView 
+				android:layout_width="wrap_content" 
+				android:layout_height="wrap_content" 
+				android:layout_marginLeft="@dimen/margin"
+				android:textColor="#FFFFFF"
+				android:textSize="@dimen/tsize_large" 
+				android:text="HUAWEI Cast+ Code"
+				android:singleLine="false" />
+		</LinearLayout>
+
+		<LinearLayout
+			android:orientation="horizontal"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_horizontal"
+			android:paddingTop="10dip"
+			android:paddingBottom="10dip"
+			android:gravity="center" >
+
+			<TextView 
+				android:id="@+id/tv_toast"
+				android:layout_width="wrap_content" 
+				android:layout_height="wrap_content" 
+				android:textColor="#FFFFFF"
+				android:textSize="@dimen/title_large" 
+				android:letterSpacing="0.5"
+				android:singleLine="true" />
+		</LinearLayout>
+
+	</LinearLayout>
+
+	<TextView 
+		android:id="@+id/tv_toastDbg"
+		android:layout_width="wrap_content" 
+		android:layout_height="wrap_content" 
+		android:layout_alignParentLeft="true"
+		android:layout_alignParentTop="true"
+		android:textColor="#FFFFFF"
+		android:textSize="@dimen/tsize_large" 
+		android:text=""
+		android:singleLine="false" />
+
+</RelativeLayout>

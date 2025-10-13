@@ -1,10 +1,10 @@
 package com.example.heatcast
 
-import android.app.Application
+import com.waxrain.droidsender.SenderApplication
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-class CastApplication : Application() {
+class CastApplication : SenderApplication() {
     override fun onCreate() {
         super.onCreate()
     }

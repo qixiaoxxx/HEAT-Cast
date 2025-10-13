@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+	android:background="@drawable/dialog_bg"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/airbuff_title_text"
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/title_large"
+		android:background="@drawable/dialog_bg_title"
+		android:gravity="center_vertical"
+		android:textColor="#FFFFFF"
+		android:paddingLeft="@dimen/margin"
+		android:textSize="@dimen/tsize_large"
+		android:ellipsize="marquee"
+		android:singleLine="true"
+        android:text="TITLE" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+		android:padding="10dp"
+        android:orientation="vertical" >
+
+		<RelativeLayout
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_weight="1" >
+
+			<TextView 
+				android:id="@+id/airbuff_lowlevel"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:gravity="center"
+				android:layout_alignParentLeft="true"
+				android:layout_centerVertical="true"
+				android:textSize="@dimen/tsize_large"
+				android:textColor="#EEEEEE"
+				android:singleLine="true"
+				android:ellipsize="marquee" />
+			<TextView 
+				android:id="@+id/airbuff_curlevel"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:gravity="center"
+				android:layout_centerInParent="true"
+				android:textSize="@dimen/tsize_large"
+				android:textColor="#A0A0A0"
+				android:singleLine="true"
+				android:ellipsize="marquee" />
+			<TextView 
+				android:id="@+id/airbuff_highlevel"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:gravity="center"
+				android:layout_alignParentRight="true"
+				android:layout_centerVertical="true"
+				android:textSize="@dimen/tsize_large"
+				android:textColor="#EEEEEE"
+				android:singleLine="true"
+				android:ellipsize="marquee" />
+
+		</RelativeLayout>
+
+		<RelativeLayout
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_weight="1" >
+
+			<SeekBar
+                android:id="@+id/airbuff_progbar"
+				android:progressDrawable="@drawable/seekbar_style"
+				android:thumb="@drawable/seekbar_btn"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+				android:layout_centerVertical="true"
+				android:padding="5dp"
+				android:minHeight="4dp"
+				android:maxHeight="4dp" />
+		</RelativeLayout>
+
+		<Button
+			android:id="@+id/airbuff_confirm"
+			android:layout_width="150dp"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center"
+			android:layout_marginTop="10dp"
+			android:gravity="center"
+			android:singleLine="true"
+			android:textSize="@dimen/tsize_large"
+			android:text="确定"
+			android:textColor="#FFFFFF"
+			android:background="@drawable/button_bg"
+			android:layout_weight="1" />
+
+	</LinearLayout>
+
+</LinearLayout>

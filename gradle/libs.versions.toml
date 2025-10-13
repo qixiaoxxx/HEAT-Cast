@@ -22,6 +22,10 @@ kotlinxSerializationJson = "1.9.0"
 uiAndroid = "1.9.3"
 constraintlayout = "2.2.1"
 roomRuntime = "2.8.2"
+material = "1.13.0"
+leanback = "1.2.0"
+leanbackGrid = "1.0.0"
+leanbackTab = "1.1.0"
 
 
 [libraries]
@@ -53,6 +57,10 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+leanback = { module = "androidx.leanback:leanback", version.ref = "leanback" }
+leanback-grid = { module = "androidx.leanback:leanback-grid", version.ref = "leanbackGrid" }
+leanback-tab = { module = "androidx.leanback:leanback-tab", version.ref = "leanbackTab" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -62,3 +70,4 @@ hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "secrets" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin-android" }
+android-library = { id = "com.android.library", version.ref = "agp" }

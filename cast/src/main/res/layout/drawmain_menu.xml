@@ -1,0 +1,92 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:clipChildren="false" >
+
+    <LinearLayout
+        android:id="@+id/drawmenu_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <com.waxrain.droidsender.doodle.DoodleButton
+            android:id="@+id/drawbtn_draw_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@drawable/drawmain_menu_bg"
+            android:clickable="true" >
+            <ImageView
+                android:id="@+id/drawimg_draw_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:src="@drawable/drawdrawmenu" />
+		</com.waxrain.droidsender.doodle.DoodleButton>
+
+        <com.waxrain.droidsender.doodle.DoodleButton
+            android:id="@+id/drawbtn_control_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@drawable/drawmain_menu_bg"
+            android:clickable="true" >
+            <ImageView
+                android:id="@+id/drawimg_control_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:src="@drawable/drawremotemenu" />
+		</com.waxrain.droidsender.doodle.DoodleButton>
+
+        <com.waxrain.droidsender.doodle.DoodleButton
+            android:id="@+id/drawbtn_keyMenu_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@drawable/drawmain_menu_bg"
+            android:clickable="true" >
+            <ImageView
+                android:id="@+id/drawimg_keyMenu_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:src="@drawable/remotecontrol_menu" />
+		</com.waxrain.droidsender.doodle.DoodleButton>
+
+        <com.waxrain.droidsender.doodle.DoodleButton
+            android:id="@+id/drawbtn_keyHome_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@drawable/drawmain_menu_bg"
+            android:clickable="true" >
+            <ImageView
+                android:id="@+id/drawimg_keyHome_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:src="@drawable/remotecontrol_home" />
+		</com.waxrain.droidsender.doodle.DoodleButton>
+
+        <com.waxrain.droidsender.doodle.DoodleButton
+            android:id="@+id/drawbtn_keyBack_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@drawable/drawmain_menu_bg"
+            android:clickable="true" >
+            <ImageView
+                android:id="@+id/drawimg_keyBack_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:src="@drawable/remotecontrol_return" />
+		</com.waxrain.droidsender.doodle.DoodleButton>
+
+	</LinearLayout>
+
+</RelativeLayout>

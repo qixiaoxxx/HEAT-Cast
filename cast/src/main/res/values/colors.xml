@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <color name="btn_setting_menu1">#8000B366</color>
+    <color name="btn_setting_menu2">#5000B366</color>
+    <color name="btn_setting_menu3">#5000B366</color>
+    <color name="btn_setting_menu_disable">#50D3D3D3</color>
+    <color name="black">#ff000000</color>
+    <color name="dark_grey">#ff777777</color>
+    <color name="remotecontrol_press_color">#75118CE3</color>
+    <color name="tv_name_color">#F1F1F1</color>">
+</resources>

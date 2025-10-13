@@ -1,0 +1,275 @@
+<resources>
+
+	<string name="app_name">Cast Demo</string>
+
+	<!-- waxplayservice -->
+	<string name="waxplayservice_toast_bootcomplete_P2">&#160;app is started:&#160;</string>
+	<string name="waxplayservice_toast_stopcomplete_P2">&#160;app is stopped:&#160;</string>
+    <string name="waxplayservice_toast_aoinit">Audio Stream connected:&#160;</string>
+	<string name="waxplayservice_toast_aoexit">Audio Stream disconnected:&#160;</string>
+	<string name="waxplayservice_toast_macunauth">Device Configuration error, Please contact the manufacturer</string>
+	<string name="set_airplay_service_badcpuarch_P1">Bad cpu type, maybe&#160;</string>
+	<string name="set_airplay_service_badcpuarch_P2">&#160;app does not work:&#160;</string>
+	<string name="set_airplay_service_badcpuvitamio">Bad cpu feature, maybe Software Decode Player does not work:&#160;</string>
+	<string name="set_airplay_service_badcpumirror">Bad cpu feature, maybe Screen Mirroring receiver does not work:&#160;</string>
+	<string name="set_airplay_service_errstop_P2">&#160;app Exiting:&#160;</string>
+	<string name="set_srt_disabled_lite">Upgrade to Paid version to display subtitles</string>
+	<string name="service_notify_name_P2">&#160;</string>
+	<string name="service_notify_info">AirPlay/DLNA/Cast Service is Running</string>
+	<string name="service_notify_ao_conflict">Audio Stream is in use, Please stop it and request again</string>
+	<string name="service_notify_ao_unsupport">Audio Format is not supported</string>
+	<string name="service_notify_pincode">Password/PIN-Code:&#160;</string>
+	<string name="service_notify_welcome">Welcome to our office</string>
+	<string name="service_input_welcome">Input Welcome words</string>
+
+	<!-- waxplayer toast -->
+	<string name="waxplayer_custom_tip_p1">Please select [</string>
+	<string name="waxplayer_custom_tip_p2">] in your Apple device\'s Screen Mirroring list again</string>
+	<string name="waxplayer_boot_sdvideoview">Testing software decoder compatibility...</string>
+	<string name="waxplayer_toast_failure">Built-in Firmware Player in your device does not support this format, Error Code:&#160;</string>
+    <string name="waxplayer_toast_loading">Loading...</string>
+    <string name="waxplayer_toast_continuation">Resuming playback...</string>
+    <string name="waxplayer_toast_continuation_check">Whether to resume playback?</string>
+    <string name="waxplayer_toast_loaded">Buffering:&#160;</string>
+	<string name="waxplayer_toast_switchdecode">Play failure, Switching to software decoder...</string>
+    <string name="waxplayer_toast_finished">Play finished, Exiting...</string>
+    <string name="waxplayer_toast_backkeytwice">Press BACK key again to exit</string>
+	<string name="waxplayer_alert_gotosetting_title">Tips</string>
+	<string name="waxplayer_alert_gotosetting_title2">Tips&#160;(Important!)</string>
+	<string name="waxplayer_alert_gotosetting_msg">Stop playback and go to Setting?</string>
+	<string name="waxplayer_alert_gotobackground_msg">Go to background?</string>
+	<string name="waxplayer_alert_gotobackground_msg2">Play audio background?</string>
+	<string name="waxplayer_alert_gotobackground_type1">Once</string>
+	<string name="waxplayer_alert_gotobackground_type2">Always</string>
+	<string name="waxplayer_first_notice">Either AirPlay or DLNA is just a media controlling protocol, and this app just sends the playback address to the inner media player in the firmware of your device. So the streaming compatibility depends on the stability of network and the performance of your Sender device.\nIf this receiver could not be found on your Phone/Pad/PC, or streaming is not stable, please try rebooting your Wireless Router or contact us to seek help.</string>
+	<string name="waxplayer_second_notice2">Thanks for choosing AirPin. This is free version with ads.\nYou can upgrade to Paid version to unlock all options and remove ads.\nPlease go to [HELP] menu to get more introductions.</string>
+	<string name="waxplayer_toast_restart">Stop playback failed and Restarting...</string>
+	<string name="waxplayer_toast_extplayer_fail">No External Player supporting this format is found</string>
+	<string name="waxplayer_toast_airplay_drm">The stream is protected by DRM and may not be played on this device</string>
+	<string name="waxplayer_toast_airplay_drm2">The stream is encrypted, Please go to its Website in Safari and try again.</string>
+	<string name="waxplayer_toast_airplay_drm2_ow">Due to the protection of Digital Rights Management, the content you are currently streaming can not be mirrored</string>
+	<string name="dialog_stop_and_exit_msg">Stop service and exit the app?</string>
+	<string name="service_exiting_P2">&#160;app is Exiting...</string>
+	<string name="service_exiting_verify_order">&#160;app is Exiting. Please restart it to verify the order after exit.</string>
+	<string name="service_order_not_ready">Auth Module is connecting to the network, Please try it later</string>
+	<string name="service_confliction">Confliction is detected.\nIf AirPlay does not work correctly, Please Stop or Remove other AirPlay receivers...</string>
+    <string name="waxplayer_hwdec_failure_P1">Hardware Decoder incompatible, Please stream it again to let&#160;</string>
+    <string name="waxplayer_hwdec_failure_P2">&#160;app switch to Software Decoder</string>
+    <string name="alert_drawscreencap_saved">Screen Capture saved to Gallery:&#160;</string>
+
+	<!-- NoticeDialog -->
+	<string name="notice_dialog_title">A letter to dear users</string>
+	<string name="notice_dialog_content"></string>
+	<string name="notice_msg_gglauthfail">Verify Purchase Record failed...</string>
+	<string name="notice_hwdec_onpaused">Cast Paused.\nYou can cast again later.</string>
+	<string name="notice_msg_nebula">Sorry.\nThis app is designed for NEBULA devices.</string>
+	<!-- UpdateDialog -->
+	<string name="alertdlg_agree">Agree</string>
+	<string name="alertdlg_reject">Reject</string>
+	<string name="alertdlg_confirm">Confirm</string>
+	<string name="alertdlg_cancel">Cancel</string>
+    <string name="alertdlg_cancel2">Background</string>
+    <string name="alertdlg_reqgrant_bt">Permission is required to connect Bluetooth for remote control</string>
+    <string name="alertdlg_reqgrant">Permission is required for running in background and displaying Media Metadata</string>
+	<string name="alertdlg_reqgrant2">Can\'t start Player in background mode since Android 10, Please stay in app main activity before streaming</string>
+	<!-- UninstallDialog -->
+	<string name="uninstall_dialog_title">Uninstall (LITE) version</string>
+	<string name="uninstall_dialog_content">Should we uninstall (LITE) version to make (PRO) version work now?</string>
+	<string name="uninstall_dialog_title2">Uninstall old (PRO) version</string>
+	<string name="uninstall_dialog_content2">Should we uninstall old (PRO) version to make new (PRO) version work now?</string>
+	<!-- PatternDialog -->
+    <string name="pattern_dialog_title">Audio/Video Player Switch</string>
+	<string name="pattern_dialog_hardplay">System Firmware Player(Default)</string>
+	<string name="pattern_dialog_hardplayS">System Firmware Player</string>
+	<string name="pattern_dialog_softplay_swdec">Built-in Player(Software Decode)</string>
+	<string name="pattern_dialog_softplay_hwdec">Built-in Player(Hardware Decode)</string>
+	<string name="pattern_dialog_extplay">External Player</string>
+    <!-- HwDecDialog -->
+    <string name="hwdec_dialog_title">Decoder for Screen Mirroring</string>
+	<string name="hwdec_dialog_harddecode">Hardware Decoder(Incompatible or slower on some devices)</string>
+	<string name="hwdec_dialog_softdecode">Software Decoder(Default)</string>
+	<string name="hwdec_dialog_softdecode2">Software Decoder(Enhanced)</string>
+	<string name="hwdec_dialog_harddecodeS">Hardware Decoder</string>
+	<string name="hwdec_dialog_softdecodeS">Software Decoder</string>
+	<!-- SpeedDialog -->
+    <string name="speed_dialog_title">Play Speed</string>
+	<!-- ScaleDialog -->
+    <string name="scale_dialog_title">Display Mode</string>
+    <string name="scale_dialog_original">Scale</string>
+    <string name="scale_dialog_fullscreen">Fullscreen</string>
+    <string name="scale_dialog_zoom">Zoom</string>
+    <string name="scale_dialog_title2">Window Mode</string>
+    <string name="scale_dialog_fullscreen2">Zoom Window</string>
+    <string name="scale_dialog_locked">Lock Player</string>
+	<!-- CursorDialog -->
+    <string name="cursor_dialog_title">Cursor Mode for Sender</string>
+    <string name="cursor_dialog_mouse">Emulate Click as Touch Pad</string>
+    <string name="cursor_dialog_touch">Emulate Click as Touch Pen</string>
+	<!-- OrientationDialog -->
+    <string name="orientation_dialog_title">Display Orientation</string>
+    <string name="orientation_dialog_landscape">Landscape</string>
+    <string name="orientation_dialog_portrait">Portrait</string>
+    <string name="orientation_dialog_auto">AutoRotate</string>
+    <string name="orientation_dialog_keep">FollowSystem</string>
+	<!-- AirTunes Buffer Dialog -->
+    <string name="dlg_airtune_buffer_title">Latency/Buffer Setting</string>
+    <string name="dlg_airtune_buffer_lowlevel">[100ms]Low</string>
+    <string name="dlg_airtune_buffer_highlevel">High[3s]</string>
+	<!-- AirPlay Mirroring Dialog -->
+    <string name="dlg_airplay_mirror_resolution_title">AirPlay Display Resolution</string>
+    <string name="dlg_airplay_mirror_resolution_UHD">Ultra High Definition(4K)</string>
+    <string name="dlg_airplay_mirror_resolution_FHD">Full High Definition(1080P)</string>
+    <string name="dlg_airplay_mirror_resolution_HD">High Definition(960P)</string>
+    <string name="dlg_airplay_mirror_resolution_SD">Standard Definition(576P)</string>
+    <string name="dlg_airplay_mirror_resolution_LD">Low Definition(420P)</string>
+	<!-- AboutDialog -->
+	<string name="about_dialog_title_P1">About&#160;</string>
+	<string name="about_dialog_versioninfo">Version&#160;&#160;&#160;&#160;:&#160;</string>
+	<string name="about_dialog_developer">Developer:&#160;</string>
+	<string name="about_dialog_feedback">Feedback&#160;:&#160;</string>
+	<string name="about_dialog_website">Website&#160;&#160;&#160;:&#160;</string>
+	<string name="about_dialog_curmac">MAC&#160;Addr:&#160;</string>
+	<string name="about_dialog_curipaddr">IP&#160;&#160;Addr:&#160;</string>
+	<string name="about_dialog_curdevname">Nickname:&#160;</string>
+	<string name="about_dialog_cursccode">Screen&#160;Code:&#160;</string>
+	<string name="about_dialog_servaddr">Server&#160;Addr:&#160;</string>
+	<string name="about_dialog_curwifi">WiFi:&#160;</string>
+	<!-- DeviceNameDialog -->
+	<string name="device_name_dialog_title">Please input device nickname</string>
+	<!-- BindDestIpDialog -->
+	<string name="bind_destip_dialog_title">Scan QR Code with binder device</string>
+	<!-- DevicePasswordDialog -->
+	<string name="passwd_dialog_title">Please set a password</string>
+	<!-- RegcodeDialog -->
+	<string name="regcode_dialog_title">Please input Register code</string>
+    <string name="dialog_smb_add_ip_content">Add Samba Host by IP Addr</string>
+    <string name="dialog_smb_add_ip_title">Input IP Addr</string>
+	<!-- QuestionDialog -->
+	<string name="help_dialog_title">Questions and Solutions</string>
+	<string name="help_dialog_question1">&#160;&#160;Q: How to use this app?</string>
+	<string name="help_dialog_answer1">&#160;&#160;A: For iPad/iPhone(iOS 5.1 or greater required): Open media in webpages/Photo/Music/Apps, find AirPlay icon on the controlling bar or the edge of screen, then press it and choose your Smart TV/Box. For other Phone/Pad and PC: Open AirPlay/DLNA/UPnP controlling App, then select your Smart TV/Box.</string>
+	<string name="help_dialog_question2">&#160;&#160;Q: Why is there no AirPlay icon or no device in the list?</string>
+	<string name="help_dialog_answer2">&#160;&#160;A: Check network connection for controlling side(eg. iPad) and Device side(eg. Smart TV). Go to Settings to reconnect the network of controlling side and Device side, or just reboot them.</string>
+	<string name="help_dialog_question3">&#160;&#160;Q: What should I do if the application encounters an Exception or Forcing closing?</string>
+	<string name="help_dialog_answer3_P1">&#160;&#160;A: Click yes. Go to the Application list page, then click&#160;</string>
+	<string name="help_dialog_answer3_P2">&#160;icon to restart the app. If there is no device found, recommendly go to Settings to reconnect the network of your controlling side.</string>
+	<string name="help_dialog_question4">&#160;&#160;Q: Why does not it play videos or photos after playing music via AirTunes?</string>
+	<string name="help_dialog_answer4_P1">&#160;&#160;A: Please restart the&#160;</string>
+	<string name="help_dialog_answer4_P2">&#160;app and reboot iPad/iPhone; If problem still exists, Please turn off AirTunes in the Setting page and then retry.</string>
+	<string name="help_dialog_question5">&#160;&#160;Q: What is Anti-Disturb Mode?</string>
+	<string name="help_dialog_answer5_P1">&#160;&#160;A: Some controlling side software will exit and send a force STOP/PAUSE command to the&#160;</string>
+	<string name="help_dialog_answer5_P2">&#160;app if you press HOME key, or there is an incoming call, So when you open Anti-Disturb Mode the media will be continuing playing in this case.</string>
+	<string name="help_dialog_question6">&#160;&#160;Q: How to use the DMS/NAS Player?</string>
+	<string name="help_dialog_answer6">&#160;&#160;A: This app will automatically discover the DLNA Media Servers/Samba Hosts in the Local area network on Windows PC, NAS, or a Box. If you are using File Sharing on Mac-Book with Mac-OSX-10.10 or higher, please install SmbUp first.</string>
+    <!-- PurchaseDialog -->
+    <string name="pay_cancel_msg">Leave the current page?</string>
+
+	<!-- SettingActivity -->
+	<string name="set_airplay_setting_title">SETTING</string>
+	<string name="set_airplay_service_boot_P1">Checking&#160;</string>
+	<string name="set_airplay_service_boot_P2">&#160;app...</string>
+	<string name="set_airplay_service_notexist_P1">Load&#160;</string>
+	<string name="set_airplay_service_notexist_P2">&#160;app failure. Restart the app and try again</string>
+	<string name="set_airplay_service_bgactivity">Can\'t start Player in background mode since Android 10, Please stay in app main activity and try again</string>
+    <string name="set_airplay_title">AIRPLAY</string>
+    <string name="set_airplay_content">AirPlay</string>
+    <string name="set_airplay_prompt">iOS Video/Photo/Audio streaming</string>
+    <string name="set_airplay2_content">AirPlay2</string>
+    <string name="set_airplay2_prompt">iOS Video/Audio Multi-Room streaming</string>
+  	<string name="set_airtune_content">AirTunes</string>
+    <string name="set_airtune_prompt">iOS Audio streaming</string>
+    <string name="set_passwd_content">Password setting for AirPlay/DLNA</string>
+    <string name="set_passwd_prompt">Password setting for AirPlay/DLNA</string>
+    <string name="set_passwd_type1">No Password</string>
+    <string name="set_passwd_type2">Fixed Password</string>
+    <string name="set_passwd_type3">Dynamic Password</string>
+    <string name="set_dlna_title">DLNA &#38; CAST</string>
+    <string name="set_dlna_content">DLNA DMR</string>
+    <string name="set_dlna_prompt">DLNA/UPnP Media streaming</string>
+    <string name="set_dlnanas_content">Playing Media in DMS/NAS</string>
+    <string name="set_dlnanas_prompt">No DMS/NAS is found yet</string>
+    <string name="set_dlnanas_found">Server Count:&#160;</string>
+    <string name="set_dlnanas_loading">Loading DMS/NAS moudle...</string>
+    <string name="set_advanced_title">GENERAL</string>
+    <string name="set_device_name_content">Device Nickname</string>
+    <string name="set_device_name_prompt">Current Nickname is:&#160;</string>
+    <string name="set_auto_start_content">Automatically Launch</string>
+    <string name="set_auto_start_prompt">Automatically Launch on System Startup</string>
+    <string name="set_max_players_content">Multi-Window Switch</string>
+    <string name="set_advanced_controlled_content">Anti-Disturb Mode</string>
+    <string name="set_advanced_controlled_prompt">Media keeps playing when your sender device is locked</string>
+    <string name="set_advanced_autoresume_content">Resume Playback</string>
+    <string name="set_advanced_autoresume_prompt">Resume playback automatically</string>
+    <string name="set_advanced_doodle_content">Doodle and Annotation</string>
+    <string name="set_advanced_doodle_prompt">Enable Doodle while Screen Mirroring</string>
+    <string name="set_experimental">EXPERIMENTAL</string>
+    <string name="set_advanced_player_content">Player Switch</string>
+    <string name="set_advanced_decoder_content">Decoder Switch</string>
+    <string name="set_advanced_player_prompt">Current Player is:&#160;</string>
+    <string name="set_advanced_decoder_prompt">Current Decoder is:&#160;</string>
+    <string name="set_advanced_persistcover_content">Audio Metadata display</string>
+    <string name="set_advanced_persistcover_prompt">Persist to display metadata of the song</string>
+    <string name="set_advanced_airtune_buffer_content">Audio Latency/Buffer</string>
+    <string name="set_advanced_airtune_buffer_prompt">Large buffer can reduce dropout but sound will be delayed</string>
+    <string name="set_advanced_airplay_mirror_resolution_content">AirPlay Display Resolution</string>
+    <string name="set_advanced_airplay_mirror_resolution_prompt">Higher Resolution makes better quality but slower speed</string>
+    <string name="set_advanced_cursormode_content">Reverse Control Mode for Screen Mirroring via Sender</string>
+    <string name="set_advanced_orientation_content">Display Orientation</string>
+    <string name="set_advanced_orientation_prompt">Display Orientation</string>
+    <string name="set_passcode_content">Passcode to change app setting</string>
+	<string name="set_help_title">HELP</string>
+    <string name="set_help_content">Help</string>
+    <string name="set_help_prompt">Questions and Answers</string>
+    <string name="set_about_title">ABOUT this app</string>
+    <string name="set_about_content">About this app</string>
+    <string name="set_about_prompt1">Visit&#160;</string>
+    <string name="set_about_prompt2">&#160;to get PC and Phone Sender</string>
+    <string name="set_about_prompt3">About</string>
+    <string name="set_about_prompt4">Search AirPin in GooglePlay</string>
+    <string name="set_regauth_content_bad">This app is not Registered</string>
+    <string name="set_regauth_content_ok">This app is Registered</string>
+    <string name="set_regauth_prompt">MachineCode:&#160;</string>
+    <string name="set_installpro_content">Upgrade to Paid version</string>
+    <string name="set_installpro_prompt">Remove ads and get more functions and features</string>
+    <string name="bthidselectdlg_dialog_title">Select Remote Device to Control:&#160;</string>
+    <string name="dialog_smb_login_title">Login is needed:&#160;</string>
+    <string name="input_username">Input Username:&#160;</string>
+    <string name="input_password">Input Password:&#160;</string>
+    <string name="set_airplay_toast_open">Open AirPlay service: The service will restart now to take effect</string>
+    <string name="set_airplay_toast_close">Close AirPlay service: The service will restart now to take effect</string>
+    <string name="set_airtune_toast_open">Open AirTunes service: The service will restart now to take effect</string>
+    <string name="set_airtune_toast_close">Close AirTunes service: The service will restart now to take effect</string>
+    <string name="set_dlna_toast_open">Open DLNA service: The service will restart now to take effect</string>
+    <string name="set_dlna_toast_close">Close DLNA service: The service will restart now to take effect</string>
+	<string name="set_name_toast_saved">Device name updated: The service will restart now to take effect</string>
+	<string name="set_passwd_toast_saved">Password updated: The service will restart now to take effect</string>
+	<string name="set_passwd_toast_wrong">Password invalid: Max 6 numbers</string>
+    <string name="set_controlled_toast_open">Open Anti-Disturb Mode: Player will not excute STOP/PAUSE command from controlling side</string>
+    <string name="set_controlled_toast_close">Close Anti-Disturb Mode: Player will be fully controlled by controlling side</string>
+    <string name="set_airtune_persistcover_open">Display Cover of the song always while audio streaming</string>
+    <string name="set_airtune_persistcover_close">Display Cover of each song only once while audio streaming</string>
+    <string name="set_autoresume_open">Automatically resume playback</string>
+    <string name="set_autoresume_close">Manually resume playback</string>
+    <string name="set_auto_start_toast_open">Enable Automatically Launch: It takes effect the next time</string>
+    <string name="set_auto_start_toast_close">Disable Automatically Launch: It takes effect the next time</string>
+    <string name="set_airtune_buffer_change">AirTunes Buffer changed: The service will restart now to take effect</string>
+    <string name="set_regcode_toast_ok">Register successfully</string>
+    <string name="set_regcode_toast_bad">Register unsuccessfully</string>
+    <string name="waxplayer_prompt_dlg_play_msg1">Do you want to play &#160;\'</string>
+    <string name="waxplayer_prompt_dlg_play_msg2">\'&#160;?</string>
+    <string name="waxplayer_prompt_dlg_play_yes">Yes</string>
+    <string name="waxplayer_prompt_dlg_play_no">No</string>
+    <string name="set_hidden_setting_enabled">Congratulations! Setting was updated, please restart this app</string>
+    <string name="set_hidden_setting_enabled2">Congratulations! Setting was updated, please play it again</string>
+	<string name="pay_authok">&#160;[Licensed]</string>
+    <string name="bgSetting_notice">Click or Press Keys(except Back Key) to start Settings/Fuctions list</string>
+    <string name="bgSetting_notice1">Use built-in AirPlay to Mirror Screen/Stream Media from your iOS/MacOS devices</string>
+    <string name="bgSetting_notice2">Use AirPinPcSender to Mirror Screen/Stream Media from your Windows PC</string>
+    <string name="bgSetting_notice3">Use AirPinCast to Mirror Screen/Stream Media from your Android Portable devices</string>
+    <string name="bgSetting_notice4">Double click OK to zoom the Phone\' screen while mirroring</string>
+    <string name="set_privacy_prompt">Privacy Notice</string>
+    <string name="set_privacy_content">Developer: WaxRain Tech.\n1) User Information:\nWe do not need or collect any of your personal information.\n2) User Behavier:\nWe do not need or collect any of your behaviers.\n3) Device Information:\nWe do not need or collect any of your device information(For example: IMEI, IMSI, MAC Address, App List, Serial Number, Android ID...). But the app needs to access MAC Address and Android ID in background because DLNA/AirPlay uses them as an unique identification in the local area network; and the app needs to query network state periodly to restart DLNA/AirPlay service if network changes.</string>
+    <string name="set_prompt_dlg_network_not_connected">Network not ready, Connect the network first.</string>
+    <string name="set_prompt_dlg_cust_toast_str1">AirPinCustom@FangHua</string>
+
+</resources>

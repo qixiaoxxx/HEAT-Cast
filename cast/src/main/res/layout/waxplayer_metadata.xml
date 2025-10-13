@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/layout_metadata_root"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:orientation="horizontal"
+    android:background="@drawable/toast_bg"
+	android:layout_gravity="left|center_vertical"
+	android:gravity="left|center_vertical" >
+
+	<LinearLayout
+		android:id="@+id/layout_metadata"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		android:layout_gravity="left|center_vertical"
+		android:padding="4dp" >
+
+		<LinearLayout
+			android:id="@+id/layout_metadata_cover"
+			android:orientation="horizontal"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="left" >
+
+			<ImageView
+				android:id="@+id/iv_toast_cover"
+				android:layout_width="wrap_content" 
+				android:layout_height="wrap_content" 
+				android:scaleType="fitXY" 
+				android:adjustViewBounds="true" 
+				android:maxWidth="@dimen/metaview_width" 
+				android:maxHeight="@dimen/metaview_height" 
+				android:src="@drawable/album_def" />
+
+		</LinearLayout>
+
+		<LinearLayout
+			android:id="@+id/layout_metadata_info"
+			android:orientation="vertical"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="left"
+			android:layout_below="@+id/layout_metadata_cover"
+			android:layout_marginTop="@dimen/margin" >
+
+			<TextView
+				android:id="@+id/tv_toast_title"
+				android:layout_width="wrap_content" 
+				android:layout_height="wrap_content" 
+				android:textSize="@dimen/tsize_large" 
+				android:layout_weight="1" 
+				android:ellipsize="marquee"
+				android:textColor="#FFFFFFFF"
+				android:layout_marginRight="@dimen/margin"
+				android:singleLine="true" />
+
+			<TextView
+				android:id="@+id/tv_toast_artist"
+				android:layout_width="wrap_content" 
+				android:layout_height="wrap_content" 
+				android:textSize="@dimen/tsize_medium" 
+				android:textColor="#FFFFFFFF"
+				android:layout_weight="1" 
+				android:ellipsize="marquee"
+				android:singleLine="true" />
+
+			<TextView
+				android:id="@+id/tv_toast_album"
+				android:layout_width="wrap_content" 
+				android:layout_height="wrap_content" 
+				android:textSize="@dimen/tsize_medium" 
+				android:textColor="#FFFFFFFF"
+				android:layout_marginRight="@dimen/margin"
+				android:layout_weight="1" 
+				android:ellipsize="marquee"
+				android:singleLine="true" />
+
+			<ProgressBar
+				android:id="@+id/tv_progbar"
+				style="?android:attr/progressBarStyleHorizontal" 
+				android:progressDrawable="@drawable/seekbar_style2"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:layout_centerVertical="true"
+				android:layout_weight="1" 
+				android:minWidth="100px"
+				android:paddingTop="3dp"
+				android:paddingBottom="3dp"
+				android:minHeight="@dimen/margin2" />
+
+		</LinearLayout>
+
+	</LinearLayout>
+
+</RelativeLayout>

@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "HEAT Cast"
 include(":app")
- 
+include(":cast")

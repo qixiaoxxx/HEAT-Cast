@@ -1,0 +1,275 @@
+<resources>
+
+	<string name="app_name">Cast PRO</string>
+
+	<!-- waxplayservice -->
+    <string name="waxplayservice_toast_bootcomplete_P2">&#160;应用已启动：</string>
+	<string name="waxplayservice_toast_stopcomplete_P2">&#160;应用已停止：</string>
+    <string name="waxplayservice_toast_aoinit">音频输出已连接：</string>
+	<string name="waxplayservice_toast_aoexit">音频输出已断开：</string>
+	<string name="waxplayservice_toast_macunauth">设备配置错误、请联系生产厂商</string>
+	<string name="set_airplay_service_badcpuarch_P1">不支持的处理器类型，</string>
+	<string name="set_airplay_service_badcpuarch_P2">&#160;应用可能无法工作：</string>
+	<string name="set_airplay_service_badcpuvitamio">不支持的处理器类型，软件解码播放器可能无法工作：</string>
+	<string name="set_airplay_service_badcpumirror">不支持的处理器类型，屏幕镜像可能无法工作：</string>
+	<string name="set_airplay_service_errstop_P2">&#160;应用退出：</string>
+	<string name="set_srt_disabled_lite">升级到收费版以便显示字幕</string>
+	<string name="service_notify_name_P2">&#160;</string>
+	<string name="service_notify_info">AirPlay/DLNA/Cast 服务运行中</string>
+	<string name="service_notify_ao_conflict">音频输出正在占用，请停止后重试</string>
+	<string name="service_notify_ao_unsupport">音频格式不支持</string>
+	<string name="service_notify_pincode">密码/PIN码：</string>
+	<string name="service_notify_welcome">欢迎您的到来</string>
+	<string name="service_input_welcome">输入欢迎语</string>
+
+	<!-- waxplayer toast -->
+	<string name="waxplayer_custom_tip_p1">请在苹果设备投屏菜单中重新选择设备 [</string>
+	<string name="waxplayer_custom_tip_p2">]</string>
+    <string name="waxplayer_boot_sdvideoview">正在检测软件解码器兼容性...</string>
+    <string name="waxplayer_toast_failure">设备内置的固件播放器不支持您推送的格式，错误代码：</string>
+    <string name="waxplayer_toast_loading">正在加载...</string>
+    <string name="waxplayer_toast_continuation">正在恢复上次播放时间...</string>
+    <string name="waxplayer_toast_continuation_check">是否恢复上次播放时间？</string>
+    <string name="waxplayer_toast_loaded">已加载：</string>
+    <string name="waxplayer_toast_switchdecode">播放失败，切换到软件解码器：</string>
+    <string name="waxplayer_toast_finished">播放结束，正在退出...</string>
+    <string name="waxplayer_toast_backkeytwice">再按一次返回键退出播放</string>
+	<string name="waxplayer_alert_gotosetting_title">友情提示</string>
+	<string name="waxplayer_alert_gotosetting_title2">重要提示！</string>
+	<string name="waxplayer_alert_gotosetting_msg">停止播放并进入设置菜单？</string>
+	<string name="waxplayer_alert_gotobackground_msg">进入后台播放？</string>
+	<string name="waxplayer_alert_gotobackground_msg2">后台播放音乐？</string>
+	<string name="waxplayer_alert_gotobackground_type1">仅一次</string>
+	<string name="waxplayer_alert_gotobackground_type2">始终</string>
+	<string name="waxplayer_first_notice">AirPlay或DLNA是媒体播放控制协议，该应用仅把播放地址传递给设备内置的固件播放器；播放效果依赖于网络稳定性以及播放器和推送端的性能。\n如果无法找到设备、或播放不稳定，请尝试重启路由器或联系我们以获得帮助。</string>
+	<string name="waxplayer_second_notice2">谢谢您选择AirPin。该免费版自带广告。\n升级到收费版解锁全部功能和去掉广告。\n前往 [帮助] 菜单获取更多信息。</string>
+	<string name="waxplayer_toast_restart">停止播放失败、重启中...</string>
+	<string name="waxplayer_toast_extplayer_fail">没有找到支持该格式的外部播放器</string>
+	<string name="waxplayer_toast_airplay_drm">该视频流已被DRM保护、有可能无法在该设备上播放</string>
+	<string name="waxplayer_toast_airplay_drm2">该视频流已被加密、请在Safari中进入其视频网站播放并推送</string>
+	<string name="waxplayer_toast_airplay_drm2_ow">由于版权内容保护，该内容不能投屏显示</string>
+	<string name="dialog_stop_and_exit_msg">停止服务并完全退出应用？</string>
+	<string name="service_exiting_P2">&#160;应用正在退出...</string>
+	<string name="service_exiting_verify_order">&#160;应用正在退出，请在退出后重启软件以便验证订单。</string>
+	<string name="service_order_not_ready">授权系统联网中，请稍后再试</string>
+	<string name="service_confliction">检测到应用冲突。\n如果 AirPlay 功能无法正常使用、请先停用或卸载其它 AirPlay 接收端...</string>
+    <string name="waxplayer_hwdec_failure_P1">硬件解码不兼容，请重新推送以便&#160;</string>
+    <string name="waxplayer_hwdec_failure_P2">&#160;应用切换到软解模式</string>
+    <string name="alert_drawscreencap_saved">屏幕截图保存到相册：</string>
+
+	<!-- NoticeDialog -->
+	<string name="notice_dialog_title">告用户书</string>
+	<string name="notice_dialog_content"></string>
+	<string name="notice_msg_gglauthfail">验证购买记录失败...</string>
+	<string name="notice_hwdec_onpaused">投屏中断。\n您可以稍后重新投屏。</string>
+	<string name="notice_msg_nebula">抱歉。\n此应用仅允许在 NEBULA 设备上运行。</string>
+    <!-- UpdateDialog -->
+	<string name="alertdlg_agree">同意</string>
+	<string name="alertdlg_reject">拒绝</string>
+	<string name="alertdlg_confirm">确定</string>
+	<string name="alertdlg_cancel">取消</string>
+    <string name="alertdlg_cancel2">后台运行</string>
+    <string name="alertdlg_reqgrant_bt">需要申请权限以便连接蓝牙控制发射端设备</string>
+    <string name="alertdlg_reqgrant">需要申请权限以便后台运行和显示媒体信息</string>
+	<string name="alertdlg_reqgrant2">从 Android 10 开始需要先打开本软件界面再进行投屏</string>
+    <!-- UninstallDialog -->
+	<string name="uninstall_dialog_title">卸载免费版</string>
+	<string name="uninstall_dialog_content">需要卸载免费版以便收费版正常工作吗？</string>
+	<string name="uninstall_dialog_title2">卸载旧的收费版</string>
+	<string name="uninstall_dialog_content2">需要卸载旧的收费版以便新的收费版正常工作吗？</string>
+    <!-- PatternDialog -->
+    <string name="pattern_dialog_title">音视频播放器选择</string>
+	<string name="pattern_dialog_hardplay">系统固件播放器(默认)</string>
+	<string name="pattern_dialog_hardplayS">系统固件播放器</string>
+	<string name="pattern_dialog_softplay_swdec">内置播放器(软解码)</string>
+	<string name="pattern_dialog_softplay_hwdec">内置播放器(硬解码)</string>
+	<string name="pattern_dialog_extplay">外部播放器</string>
+    <!-- HwDecDialog -->
+    <string name="hwdec_dialog_title">屏幕镜像解码器选择</string>
+	<string name="hwdec_dialog_harddecode">硬件解码器(部分设备上不兼容或延时高)</string>
+	<string name="hwdec_dialog_softdecode">软件解码器(默认)</string>
+	<string name="hwdec_dialog_softdecode2">软件解码器(增强)</string>
+	<string name="hwdec_dialog_harddecodeS">硬件解码器</string>
+	<string name="hwdec_dialog_softdecodeS">软件解码器</string>
+	<!-- SpeedDialog -->
+    <string name="speed_dialog_title">播放速度</string>
+	<!-- ScaleDialog -->
+    <string name="scale_dialog_title">显示模式</string>
+    <string name="scale_dialog_original">原始比例</string>
+    <string name="scale_dialog_fullscreen">全屏填充</string>
+    <string name="scale_dialog_zoom">放大</string>
+    <string name="scale_dialog_title2">窗口模式</string>
+    <string name="scale_dialog_fullscreen2">窗口放大</string>
+    <string name="scale_dialog_locked">锁定播放器</string>
+	<!-- CursorDialog -->
+    <string name="cursor_dialog_title">鼠标模式</string>
+    <string name="cursor_dialog_mouse">将点击模拟成触摸板</string>
+    <string name="cursor_dialog_touch">将点击模拟成触控笔</string>
+	<!-- OrientationDialog -->
+    <string name="orientation_dialog_title">画面方向</string>
+    <string name="orientation_dialog_landscape">横屏</string>
+    <string name="orientation_dialog_portrait">竖屏</string>
+    <string name="orientation_dialog_auto">自动旋转</string>
+    <string name="orientation_dialog_keep">跟随系统</string>
+	<!-- AirTunes Buffer Dialog -->
+    <string name="dlg_airtune_buffer_title">延迟/缓冲设置</string>
+    <string name="dlg_airtune_buffer_lowlevel">[100ms]低</string>
+    <string name="dlg_airtune_buffer_highlevel">高[3s]</string>
+	<!-- AirPlay Mirroring Dialog -->
+    <string name="dlg_airplay_mirror_resolution_title">AirPlay显示分辨率</string>
+    <string name="dlg_airplay_mirror_resolution_UHD">超高清晰度(4K)</string>
+    <string name="dlg_airplay_mirror_resolution_FHD">全高清晰度(1080P)</string>
+    <string name="dlg_airplay_mirror_resolution_HD">高清晰度(960P)</string>
+    <string name="dlg_airplay_mirror_resolution_SD">标准清晰度(576P)</string>
+    <string name="dlg_airplay_mirror_resolution_LD">低清晰度(420P)</string>
+	<!--AboutDialog  -->
+    <string name="about_dialog_title_P1">关于&#160;</string>
+	<string name="about_dialog_versioninfo">版本信息：</string>
+	<string name="about_dialog_developer">开发团队：</string>
+	<string name="about_dialog_feedback">信息反馈：</string>
+	<string name="about_dialog_website">官方网站：</string>
+	<string name="about_dialog_curmac">物理地址：</string>
+	<string name="about_dialog_curipaddr">I&#160;P&#160;地&#160;址&#160;：</string>
+	<string name="about_dialog_curdevname">设备昵称：</string>
+	<string name="about_dialog_cursccode">投&#160;&#160;屏&#160;&#160;码：</string>
+	<string name="about_dialog_servaddr">服务器地址：</string>
+	<string name="about_dialog_curwifi">WiFi：</string>
+	<!-- DeviceNameDialog -->
+	<string name="device_name_dialog_title">请输入设备昵称</string>
+	<!-- BindDestIpDialog -->
+	<string name="bind_destip_dialog_title">请使用绑定设备扫码</string>
+	<!-- DevicePasswordDialog -->
+	<string name="passwd_dialog_title">请设置密码</string>
+	<!-- RegcodeDialog -->
+	<string name="regcode_dialog_title">请输入注册码</string>
+    <string name="dialog_smb_add_ip_content">手动输入IP地址添加Samba服务器</string>
+    <string name="dialog_smb_add_ip_title">输入IP地址</string>
+	<!-- QuestionDialog -->
+	<string name="help_dialog_title">问题与帮助</string>
+	<string name="help_dialog_question1">&#160;&#160;问：如何使用此应用？</string>
+	<string name="help_dialog_answer1">&#160;&#160;答：iPad/iPhone用户(需iOS 5.1及以上系统)：打开网页/照片/音乐/其它视频客户端并播放，在播放控制条或者屏幕侧边找到 AirPlay 图标，单击它并选中你的大屏设备。其他Phone/Pad或PC用户：打开 AirPlay/DLNA/UPnP 控制端程序，选择你的大屏设备。</string>
+	<string name="help_dialog_question2">&#160;&#160;问：为什么没有 AirPlay 图标或者点开图标后没有指定的设备？</string>
+	<string name="help_dialog_answer2">&#160;&#160;答：检查控制端(比如iPad)和设备端(比如智能电视)的网络连接。然后进入系统设置重新连接控制端和设备端的网络，或者重启控制端和设备端。</string>
+	<string name="help_dialog_question3">&#160;&#160;问：程序被强行关闭或者遇到异常终止时怎么办？</string>
+	<string name="help_dialog_answer3_P1">&#160;&#160;答：点击确定。然后进入应用程序列表，点击&#160;</string>
+	<string name="help_dialog_answer3_P2">&#160;图标、将会重启本应用。如果控制端仍未发现设备，建议进入系统设置、重新连接控制端的网络。</string>
+	<string name="help_dialog_question4">&#160;&#160;问：为什么在使用 AirTunes 播放音乐后无法再播放视频或图片？</string>
+	<string name="help_dialog_answer4_P1">&#160;&#160;答：建议重启&#160;</string>
+	<string name="help_dialog_answer4_P2">&#160;应用和iPad/iPhone；如果仍有问题，请在设置中关闭 AirTunes 选项后再试。</string>
+	<string name="help_dialog_question5">&#160;&#160;问：什么是防干扰模式？</string>
+	<string name="help_dialog_answer5_P1">&#160;&#160;答：某些控制端应用在用户按 HOME 键或有电话呼入时会退出、并且发送 停止/暂停 播放指令给&#160;</string>
+	<string name="help_dialog_answer5_P2">&#160;应用导致播放退出；该功能将使播放器不响应这些强制指令以应对这种情况。</string>
+	<string name="help_dialog_question6">&#160;&#160;问：如何使用 DMS/NAS 播放器？</string>
+	<string name="help_dialog_answer6">&#160;&#160;答：应用会自动搜索局域网中的DLNA媒体服务器及Samba主机(比如：Windows电脑、NAS、或机顶盒)。如果您在使用Mac-OSX-10.10或更高版本系统的苹果笔记本中的文件共享，请先安装SmbUp。</string>
+    <!-- PurchaseDialog -->
+    <string name="pay_cancel_msg">退出当前页面？</string>
+
+	<!-- SettingActivity -->
+	<string name="set_airplay_setting_title">系统设置</string>
+	<string name="set_airplay_service_boot_P1">正在检测&#160;</string>
+	<string name="set_airplay_service_boot_P2">&#160;应用...</string>
+	<string name="set_airplay_service_notexist_P1">加载&#160;</string>
+	<string name="set_airplay_service_notexist_P2">&#160;应用失败，重新打开应用再试</string>
+	<string name="set_airplay_service_bgactivity">从 Android 10 开始需要打开本软件界面才能启动播放器</string>
+    <string name="set_airplay_title">AIRPLAY</string>
+    <string name="set_airplay_content">AirPlay</string>
+    <string name="set_airplay_prompt">iOS设备视频/图片/音频推送</string>
+    <string name="set_airplay2_content">AirPlay2</string>
+    <string name="set_airplay2_prompt">iOS设备视频/音频多房间推送</string>
+  	<string name="set_airtune_content">AirTunes</string>
+    <string name="set_airtune_prompt">iOS设备音频推送</string>
+    <string name="set_passwd_content">AirPlay/DLNA密码设置</string>
+    <string name="set_passwd_prompt">AirPlay/DLNA密码设置</string>
+    <string name="set_passwd_type1">无密码</string>
+    <string name="set_passwd_type2">固定密码</string>
+    <string name="set_passwd_type3">动态密码</string>
+	<string name="set_dlna_title">DLNA &#38; CAST</string>
+    <string name="set_dlna_content">DLNA DMR</string>
+    <string name="set_dlna_prompt">DLNA/UPnP媒体推送</string>
+    <string name="set_dlnanas_content">DMS/NAS 媒体播放</string>
+    <string name="set_dlnanas_prompt">暂未发现 DMS/NAS</string>
+    <string name="set_dlnanas_found">服务器数量：</string>
+    <string name="set_dlnanas_loading">初始化 DMS/NAS 模块...</string>
+    <string name="set_advanced_title">通用项</string>
+    <string name="set_device_name_content">设备昵称</string>
+    <string name="set_device_name_prompt">当前设备昵称：</string>
+    <string name="set_auto_start_content">自动启动服务</string>
+    <string name="set_auto_start_prompt">系统启动时自动启动服务</string>
+    <string name="set_max_players_content">多屏幕窗口数量</string>
+    <string name="set_advanced_controlled_content">防干扰模式</string>
+    <string name="set_advanced_controlled_prompt">推送端锁屏或退出后继续播放</string>
+    <string name="set_advanced_autoresume_content">断点续播</string>
+    <string name="set_advanced_autoresume_prompt">自动恢复上次的播放时间</string>
+    <string name="set_advanced_doodle_content">批注功能</string>
+    <string name="set_advanced_doodle_prompt">画面镜像时允许批注涂鸦</string>
+    <string name="set_experimental">实验室功能</string>
+    <string name="set_advanced_player_content">播放器选择</string>
+    <string name="set_advanced_decoder_content">解码器选择</string>
+    <string name="set_advanced_player_prompt">当前播放器：</string>
+    <string name="set_advanced_decoder_prompt">当前解码器：</string>
+    <string name="set_advanced_persistcover_content">音乐专辑信息</string>
+    <string name="set_advanced_persistcover_prompt">一直显示歌曲信息</string>
+    <string name="set_advanced_airtune_buffer_content">声音延迟/缓冲管理</string>
+    <string name="set_advanced_airtune_buffer_prompt">增大缓冲以增加流畅度但是声音将会有延迟</string>
+    <string name="set_advanced_airplay_mirror_resolution_content">AirPlay显示分辨率</string>
+    <string name="set_advanced_airplay_mirror_resolution_prompt">提高分辨率可以提升画面质量但是导致速度降低</string>
+    <string name="set_advanced_cursormode_content">反向操控模式(针对Sender传屏)</string>
+    <string name="set_advanced_orientation_content">画面方向</string>
+    <string name="set_advanced_orientation_prompt">画面方向</string>
+    <string name="set_passcode_content">修改应用设置需要密码</string>
+    <string name="set_help_title">帮助</string>
+    <string name="set_help_content">帮助</string>
+    <string name="set_help_prompt">常见问题解答</string>
+    <string name="set_about_title">关于此应用</string>
+    <string name="set_about_content">关于此应用</string>
+    <string name="set_about_prompt1">请访问&#160;</string>
+    <string name="set_about_prompt2">&#160;获取配套的电脑和手机推送端</string>
+    <string name="set_about_prompt3">关于</string>
+    <string name="set_about_prompt4">在GooglePlay中搜索AirPin</string>
+    <string name="set_regauth_content_bad">软件未注册</string>
+    <string name="set_regauth_content_ok">软件已注册</string>
+    <string name="set_regauth_prompt">机器码：</string>
+    <string name="set_installpro_content">升级到收费版</string>
+    <string name="set_installpro_prompt">去广告、获取更多功能和选项</string>
+    <string name="bthidselectdlg_dialog_title">选择要触控的设备：</string>
+    <string name="dialog_smb_login_title">该设备需登录：</string>
+	<string name="input_username">请输入用户名：</string>
+    <string name="input_password">请输入密码：</string>
+    <string name="set_airplay_toast_open">打开AirPlay服务：服务将重启以生效</string>
+    <string name="set_airplay_toast_close">关闭AirPlay服务：服务将重启以生效</string>
+    <string name="set_airtune_toast_open">打开AirTunes服务：服务将重启以生效</string>
+    <string name="set_airtune_toast_close">关闭AirTunes服务：服务将重启以生效</string>
+    <string name="set_dlna_toast_open">打开DLNA服务：服务将重启以生效</string>
+    <string name="set_dlna_toast_close">关闭DLNA服务：服务将重启以生效</string>
+	<string name="set_name_toast_saved">设备名已更新：服务将重启以生效</string>
+	<string name="set_passwd_toast_saved">密码已更新：服务将重启以生效</string>
+    <string name="set_passwd_toast_wrong">密码错误：最大6个数字</string>
+    <string name="set_controlled_toast_open">打开防干扰模式：播放器将不响应控制端发送的 停止/暂停 播放指令</string>
+    <string name="set_controlled_toast_close">关闭防干扰模式：播放器将被控制端全功能控制</string>
+    <string name="set_airtune_persistcover_open">音乐推送时歌曲的信息始终显示</string>
+    <string name="set_airtune_persistcover_close">音乐推送时每首歌曲的信息只显示一次</string>
+    <string name="set_autoresume_open">自动恢复上次的播放时间</string>
+    <string name="set_autoresume_close">手动恢复上次的播放时间</string>
+    <string name="set_auto_start_toast_open">打开自动启动服务：下次启动系统时生效</string>
+    <string name="set_auto_start_toast_close">关闭自动启动服务：下次启动系统时生效</string>
+    <string name="set_airtune_buffer_change">AirTunes缓冲已保存：服务将重启以生效</string>
+    <string name="set_regcode_toast_ok">注册成功</string>
+    <string name="set_regcode_toast_bad">注册失败</string>
+    <string name="waxplayer_prompt_dlg_play_msg1">是否播放媒体&#160;\'</string>
+    <string name="waxplayer_prompt_dlg_play_msg2">\'&#160;？</string>
+    <string name="waxplayer_prompt_dlg_play_yes">是</string>
+    <string name="waxplayer_prompt_dlg_play_no">否</string>
+    <string name="set_hidden_setting_enabled">恭喜！设置已更新、请重启应用</string>
+    <string name="set_hidden_setting_enabled2">恭喜！设置已更新、请重新播放</string>
+    <string name="pay_authok">&#160;[已授权]</string>
+    <string name="bgSetting_notice">点击或按键(非返回键)进入设置和功能列表</string>
+    <string name="bgSetting_notice1">使用 iOS/MacOS 系统内置的 AirPlay 实现 屏幕镜像/媒体推送</string>
+    <string name="bgSetting_notice2">使用 AirPinPcSender 实现 Windows电脑 屏幕镜像/媒体推送</string>
+    <string name="bgSetting_notice3">使用\'浏览器\'扫码安装 AirPinCast 实现 安卓手机/平板 屏幕镜像/媒体推送</string>
+    <string name="bgSetting_notice4">投屏时双击 OK 按钮可以缩放手机画面</string>
+    <string name="set_privacy_prompt">隐私声明</string>
+    <string name="set_privacy_content">开发者：四川蜡雨互动科技有限公司\n1）用户个人信息：\n我们不需要您提供也不会收集任何个人信息。\n2）用户行为：\n我们不需要也不会收集您的任何行为信息。\n3）设备信息：\n我们不会收集您的设备信息(包括但不限于IMEI、IMSI、设备MAC地址、软件列表、设备序列号、AndroidID等)。但是该应用会在后台状态(静默状态)查询设备MAC地址和Android ID，以便DLNA/AirPlay使用它们作为该设备在局域网中的唯一标识；该应用会定期查询网络状态以便在网络变化时重启DLNA/AirPlay服务。</string>
+    <string name="set_prompt_dlg_network_not_connected">网络未连接，请连接网络</string>
+    <string name="set_prompt_dlg_cust_toast_str1">AirPin定制版@FangHua</string>
+
+</resources>

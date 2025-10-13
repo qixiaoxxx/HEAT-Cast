@@ -10,6 +10,11 @@
 .DS_Store
 /build
 /captures
+.idea
 .externalNativeBuild
 .cxx
 local.properties
+/.kotlin/errors/errors-1733795659734.log
+
+fabfile.py
+protect

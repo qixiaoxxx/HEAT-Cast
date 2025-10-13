@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+				 xmlns:tools="http://schemas.android.com/tools"
+				 android:drawable="@drawable/hws_ic_network_general_tx_bg"
+				 tools:ignore="NewApi">
+
+	<target
+			android:animation="@anim/hws_info_translate_anim"
+			android:name="network_general"/>
+
+	<target
+			android:animation="@anim/hws_path_change_anim"
+			android:name="path_change"/>
+
+</animated-vector>
