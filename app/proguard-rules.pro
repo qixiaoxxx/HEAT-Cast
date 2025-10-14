@@ -192,3 +192,14 @@
 -dontwarn com.fasterxml.jackson.databind.ObjectWriter
 -dontwarn com.fasterxml.jackson.databind.SerializationFeature
 -dontwarn com.fasterxml.jackson.databind.type.TypeFactory
+
+
+#Cast SDK混淆规则
+-keep class com.waxrain.** { *; }
+-keep class org.teleal.** { *; }
+-keep class org.fourthline.** { *; }
+-keep class org.eclipse.jetty.** { *; }
+-keep class javax.** { *; }
+-dontwarn org.eclipse.jetty.**
+-dontwarn org.teleal.**
+-dontwarn org.fourthline.**

@@ -1,26 +1,17 @@
 package com.example.heatcast.ui
 
-import android.Manifest
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.net.wifi.WifiInfo
-import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Bundle
-import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.core.content.ContextCompat
 import com.example.heatcast.BaseDataBindingActivity
 import com.example.heatcast.R
 import com.example.heatcast.databinding.ActivityMainBinding
 import com.example.heatcast.util.getAndroidId
 import com.example.heatcast.util.getDeviceName
+import com.example.heatcast.util.getWifiName
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.waxrain.airplaydmr.WaxPlayService
 import com.waxrain.droidsender.delegate.Global
@@ -55,10 +46,8 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         binding.tvSelectDeviceName.text = deviceName
 
 
-        //  请求权限以获取 Wi-Fi 名称
-        askForLocationPermission()
-
-        val wifiName = getWifiNames(this)
+        //  获取并显示 Wi-Fi 名称
+        val wifiName = getWifiName(this)
         binding.tvWifiName.text = wifiName
 
     }
@@ -206,124 +195,6 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
 
     }
 
-    fun getWifiName(context: Context): String? {
-        // 检查是否拥有位置权限
-        if (ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            return "权限不足"
-        }
-
-        val connectivityManager =
-            context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val network = connectivityManager.activeNetwork ?: return null // 获取当前活动的网络
-        val networkCapabilities = connectivityManager.getNetworkCapabilities(network) ?: return null
-
-        // 检查是否是 Wi-Fi 网络
-        if (networkCapabilities.hasTransport(android.net.NetworkCapabilities.TRANSPORT_WIFI)) {
-            val wifiManager =
-                context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-
-            // Android 10 (API 29) 及以上，使用 NetworkCapabilities 获取 SSID
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                // 从网络能力中直接获取 Wi-Fi 信息
-                val wifiInfo = networkCapabilities.transportInfo as? android.net.wifi.WifiInfo
-                // WifiInfo.getSSID() 返回的 SSID 带有双引号，需要移除
-                return wifiInfo?.ssid?.trim { it == '"' }
-            } else {
-                // 旧版本 Android 的方法
-                @Suppress("DEPRECATION")
-                val connectionInfo = wifiManager.connectionInfo
-                if (connectionInfo != null && !TextUtils.isEmpty(connectionInfo.ssid)) {
-                    // 同样，移除双引号
-                    return connectionInfo.ssid.trim { it == '"' }
-                }
-            }
-        }
-
-        return null // 如果不是 Wi-Fi 连接，返回 null
-    }
-
-    private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-            if (isGranted) {
-                // 权限已授予，现在可以获取 Wi-Fi 名称了
-                val wifiName = getWifiName(this) // 传入 Context
-                Log.d("WifiInfo", "Wi-Fi 名称: $wifiName")
-                binding.tvWifiName.text = wifiName
-            } else {
-                // 权限被拒绝，向用户解释为什么你需要这个权限
-                Log.d("WifiInfo", "位置权限被拒绝，无法获取 Wi-Fi 名称")
-            }
-        }
-
-    fun askForLocationPermission() {
-        // 请求精确位置权限
-        requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-    }
-
-
-    fun getWifiNames(context: Context): String? {
-        // 1. 权限检查：这是最关键的第一步
-        val hasLocationPermission = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-
-        if (!hasLocationPermission) {
-            // 如果没有精确位置权限，直接返回 null 或一个提示信息
-            Log.e("WifiInfo", "无法获取Wi-Fi名称，因为缺少 ACCESS_FINE_LOCATION 权限")
-            return null
-        }
-
-        // 2. 使用正确的 API 获取 ConnectivityManager
-        val connectivityManager =
-            context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
-                ?: return null
-
-        // 3. 检查当前网络是否是 Wi-Fi
-        val activeNetwork = connectivityManager.activeNetwork ?: return null
-        val networkCapabilities =
-            connectivityManager.getNetworkCapabilities(activeNetwork) ?: return null
-        val isWifi = networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-
-        if (!isWifi) {
-            Log.d("WifiInfo", "当前连接的不是 Wi-Fi 网络")
-            return null // 如果不是 Wi-Fi，返回 null
-        }
-
-        // 4. 根据 Android 版本使用不同的方法获取 SSID
-        val wifiName = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // Android 10 (API 29) 及以上
-            // 从 networkCapabilities 中获取 transportInfo
-            val transportInfo = networkCapabilities.transportInfo
-            if (transportInfo is WifiInfo) {
-                // WifiInfo.getSSID() 返回的 SSID 带有双引号，需要移除
-                transportInfo.ssid.trim { it == '"' }
-            } else {
-                null
-            }
-        } else {
-            // Android 9 (API 28) 及以下
-            val wifiManager =
-                context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
-
-            @Suppress("DEPRECATION")
-            val connectionInfo = wifiManager?.connectionInfo
-            // 同样，移除双引号
-            connectionInfo?.ssid?.trim { it == '"' }
-        }
-
-        // 5. 处理获取失败的特殊情况
-        if (wifiName.isNullOrEmpty() || wifiName.equals("<unknown ssid>", ignoreCase = true)) {
-            Log.w("WifiInfo", "获取到的 SSID 为空或 <unknown ssid>，请检查位置服务是否开启")
-            return null
-        }
-
-        return wifiName
-    }
 
     override fun onRestart() {
         super.onRestart()
