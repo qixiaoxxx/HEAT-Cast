@@ -1,7 +1,6 @@
 package com.example.heatcast.ui
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -20,6 +19,7 @@ import androidx.core.content.ContextCompat
 import com.example.heatcast.BaseDataBindingActivity
 import com.example.heatcast.R
 import com.example.heatcast.databinding.ActivityMainBinding
+import com.example.heatcast.util.getDeviceName
 import com.waxrain.airplaydmr.WaxPlayService
 import com.waxrain.droidsender.delegate.Global
 import com.waxrain.ui.WaxPlayer
@@ -37,21 +37,28 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // firebase 事件上报
+//        val bundle = Bundle()
+//        bundle.putString(FirebaseAnalytics.Param.ACHIEVEMENT_ID, getAndroidId(this@MainActivity))
+//        FirebaseAnalytics.getInstance(this@MainActivity)
+//            .logEvent(FirebaseAnalytics.Event.APP_OPEN, bundle)
+//
+
         initSdk()
         startSdk()
+
+        //  获取并显示设备名称
+        val deviceName = getDeviceName(this)
+        binding.tvDeviceName.text = getString(R.string.Projection_TV, deviceName)
+        binding.tvMirroringName.text = deviceName
+        binding.tvSelectDeviceName.text = deviceName
+
 
         //  请求权限以获取 Wi-Fi 名称
         askForLocationPermission()
 
         val wifiName = getWifiNames(this)
         binding.tvWifiName.text = wifiName
-        //  获取并显示设备名称
-        val deviceName = getDeviceName(this)
-        Log.d("DeviceInfo", "设备名称: $deviceName")
-        // 假设你的 activity_main.xml 中有一个叫 tv_device_name 的 TextView
-        binding.tvDeviceName.text = getString(R.string.Projection_TV,  WaxPlayService._config.nickName)
-        binding.tvMirroringName.text =  WaxPlayService._config.nickName
-        binding.tvSelectDeviceName.text = WaxPlayService._config.nickName
 
     }
 
@@ -254,69 +261,6 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
     fun askForLocationPermission() {
         // 请求精确位置权限
         requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-    }
-
-    @SuppressLint("MissingPermission")
-    fun getDeviceName(context: Context): String {
-        // 方案 1: 【最高优先级】通过拼接 SDK 的属性来重构完整的服务名称
-        try {
-            // 确保 Config 的实例存在
-            if (WaxPlayService._config == null) {
-                WaxPlayService._config = Config(context.applicationContext)
-            }
-
-            val sdkConfig = WaxPlayService._config
-
-            //  分别获取基础名称 (nickName) 和随机码后缀 (srv_name_ext)
-            val baseName = sdkConfig.nickName
-            val nameExtension = sdkConfig.btHidDevName
-
-            // 检查 nickName 是否有效
-            if (!baseName.isNullOrEmpty()) {
-                // 如果后缀也存在，则将它们拼接成完整的名称
-                return if (!nameExtension.toString().isNullOrEmpty()) {
-                    "${baseName}_${nameExtension}" // <-- 拼接成 "HEATCast_62209F"
-                } else {
-                    baseName // 如果没有后缀，则只返回基础名称
-                }
-            }
-        } catch (e: Exception) {
-            Log.e("DeviceInfo", "从 SDK 获取名称失败", e)
-        }
-
-        // --- 如果方案 1 失败，则执行下面的备用方案 ---
-
-        // 方案 2: 尝试获取全局设置中的设备名称
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val deviceName = android.provider.Settings.Global.getString(
-                context.contentResolver,
-                android.provider.Settings.Global.DEVICE_NAME
-            )
-            if (!deviceName.isNullOrEmpty()) {
-                return deviceName
-            }
-        }
-
-        // 方案 3: 尝试获取蓝牙名称
-        try {
-            val bluetoothName = android.provider.Settings.Secure.getString(
-                context.contentResolver,
-                "bluetooth_name"
-            )
-            if (!bluetoothName.isNullOrEmpty()) {
-                return bluetoothName
-            }
-        } catch (e: Exception) {
-            // 忽略异常
-        }
-
-        // 方案 4: 回退到最后的备用方法
-        val manufacturer = Build.MANUFACTURER
-        val model = Build.MODEL
-        if (model.lowercase().startsWith(manufacturer.lowercase())) {
-            return model
-        }
-        return "$manufacturer $model"
     }
 
 

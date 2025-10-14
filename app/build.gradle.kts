@@ -5,7 +5,6 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.secrets)
-    id("kotlin-kapt")
     alias(libs.plugins.compose.compiler)
 }
 

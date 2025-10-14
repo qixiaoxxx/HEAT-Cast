@@ -1,3 +1,79 @@
 package com.example.heatcast.util
 
-//存放常量
+import android.annotation.SuppressLint
+import android.content.Context
+import android.os.Build
+import android.provider.Settings
+import android.util.Log
+import com.waxrain.airplaydmr.WaxPlayService
+import com.waxrain.utils.Config
+import java.net.NetworkInterface
+import java.util.Collections
+
+
+
+/**
+ * 获取并构建设备名称。
+ * "HEATCast_" 来自 SDK，"xxxxxx" 是 MAC 地址的后六位。
+ */
+@SuppressLint("MissingPermission")
+fun getDeviceName(context: Context): String {
+    try {
+        if (WaxPlayService._config == null) {
+            WaxPlayService._config = Config(context.applicationContext)
+        }
+        val baseName = WaxPlayService._config.nickName
+        if (!baseName.isNullOrEmpty()) {
+            val macSuffix = getMacAddressLast6Chars()
+            if (macSuffix != null) {
+                // 成功获取基础名称和 MAC 后缀
+                return "${baseName}${macSuffix}"
+            } else {
+                // MAC 获取失败，使用 SDK 原始后缀作为备选
+                val nameExtension = WaxPlayService._config.btHidDevName
+                if (nameExtension.toString().isNotEmpty()) {
+                    return "${baseName}${nameExtension}"
+                }
+            }
+            return baseName
+        }
+    } catch (e: Exception) {
+        Log.e("DeviceInfo", "从 SDK 获取名称失败", e)
+    }
+    return Build.MANUFACTURER
+}
+
+/**
+ * 获取设备 Wi-Fi MAC 地址的最后6位字符。
+ * @return 格式化后的大写字符串 (例如 "A1B2C3")，如果获取失败则返回 null。
+ */
+fun getMacAddressLast6Chars(): String? {
+    try {
+        // 遍历所有网络接口，找到名为 "wlan0" 的 Wi-Fi 接口
+        val networkInterfaces = Collections.list(NetworkInterface.getNetworkInterfaces())
+        for (nif in networkInterfaces) {
+            if (nif.name.equals("wlan0", ignoreCase = true)) {
+                val macBytes = nif.hardwareAddress ?: continue // 获取硬件地址，失败则跳过
+
+                // 将字节数组转换为十六进制字符串，并取最后6位
+                val macString = macBytes.joinToString("") { String.format("%02X", it) }
+                return if (macString.length >= 6) macString.takeLast(6) else null
+            }
+        }
+    } catch (ex: Exception) {
+        Log.e("DeviceInfo", "获取 MAC 地址时发生异常", ex)
+    }
+
+    // 如果没有找到 "wlan0" 接口或发生异常，则返回 null
+    Log.w("DeviceInfo", "未能找到 'wlan0' 接口或获取 MAC 地址失败。")
+    return null
+}
+
+//获取设备AndroidId
+@SuppressLint("HardwareIds")
+fun getAndroidId(context: Context): String {
+    return Settings.Secure.getString(
+        context.contentResolver,
+        Settings.Secure.ANDROID_ID
+    )
+}
