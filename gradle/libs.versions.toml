@@ -26,7 +26,7 @@ material = "1.13.0"
 leanback = "1.2.0"
 leanbackGrid = "1.0.0"
 leanbackTab = "1.1.0"
-
+crashlytics = "3.0.6"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -71,3 +71,4 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "secrets" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin-android" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics" }

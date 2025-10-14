@@ -19,7 +19,9 @@ import androidx.core.content.ContextCompat
 import com.example.heatcast.BaseDataBindingActivity
 import com.example.heatcast.R
 import com.example.heatcast.databinding.ActivityMainBinding
+import com.example.heatcast.util.getAndroidId
 import com.example.heatcast.util.getDeviceName
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.waxrain.airplaydmr.WaxPlayService
 import com.waxrain.droidsender.delegate.Global
 import com.waxrain.ui.WaxPlayer
@@ -38,11 +40,10 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         super.onCreate(savedInstanceState)
 
         // firebase 事件上报
-//        val bundle = Bundle()
-//        bundle.putString(FirebaseAnalytics.Param.ACHIEVEMENT_ID, getAndroidId(this@MainActivity))
-//        FirebaseAnalytics.getInstance(this@MainActivity)
-//            .logEvent(FirebaseAnalytics.Event.APP_OPEN, bundle)
-//
+        val bundle = Bundle()
+        bundle.putString(FirebaseAnalytics.Param.ACHIEVEMENT_ID, getAndroidId(this@MainActivity))
+        FirebaseAnalytics.getInstance(this@MainActivity)
+            .logEvent(FirebaseAnalytics.Event.APP_OPEN, bundle)
 
         initSdk()
         startSdk()

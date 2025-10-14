@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "271054080603",
-    "project_id": "pockettv-205cf",
-    "storage_bucket": "pockettv-205cf.firebasestorage.app"
+    "project_number": "318239907725",
+    "project_id": "cast-eaae4",
+    "storage_bucket": "cast-eaae4.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:271054080603:android:23aca7b395924b6b50cd7e",
+        "mobilesdk_app_id": "1:318239907725:android:cc75afe13464417a7627c4",
         "android_client_info": {
           "package_name": "com.example.heatcast"
         }
@@ -15,45 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyD2ulpTRrn58C8l7eNv0kKPtgCQPSH8xkA"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:271054080603:android:98e2bcdca53614f350cd7e",
-        "android_client_info": {
-          "package_name": "com.loki.mobile.blue"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyD2ulpTRrn58C8l7eNv0kKPtgCQPSH8xkA"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:271054080603:android:c1faf4789cc9658950cd7e",
-        "android_client_info": {
-          "package_name": "com.ptv.mobile.green"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyD2ulpTRrn58C8l7eNv0kKPtgCQPSH8xkA"
+          "current_key": "AIzaSyB1qXP8ne4mW9CP7aZSh08Skn3igKL7PGU"
         }
       ],
       "services": {
