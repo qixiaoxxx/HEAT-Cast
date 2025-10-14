@@ -1,19 +1,22 @@
 package com.example.heatcast.ui
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.ui.geometry.isEmpty
 import androidx.core.content.ContextCompat
-import androidx.core.content.getSystemService
 import com.example.heatcast.BaseDataBindingActivity
 import com.example.heatcast.R
 import com.example.heatcast.databinding.ActivityMainBinding
@@ -22,8 +25,6 @@ import com.waxrain.droidsender.delegate.Global
 import com.waxrain.ui.WaxPlayer
 import com.waxrain.utils.Config
 import dagger.hilt.android.AndroidEntryPoint
-import android.Manifest
-import androidx.activity.result.contract.ActivityResultContracts
 
 @AndroidEntryPoint
 class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
@@ -39,23 +40,25 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         initSdk()
         startSdk()
 
-
-        // 1. 获取并显示设备名称
-        val deviceName = getDeviceName()
-        Log.d("DeviceInfo", "设备名称: $deviceName")
-        // 假设你的 activity_main.xml 中有一个叫 tv_device_name 的 TextView
-        binding.tvDeviceName.text = deviceName // 使用 ViewBinding 更新 UI
-
-        // 2. 请求权限以获取 Wi-Fi 名称
+        //  请求权限以获取 Wi-Fi 名称
         askForLocationPermission()
 
+        val wifiName = getWifiNames(this)
+        binding.tvWifiName.text = wifiName
+        //  获取并显示设备名称
+        val deviceName = getDeviceName(this)
+        Log.d("DeviceInfo", "设备名称: $deviceName")
+        // 假设你的 activity_main.xml 中有一个叫 tv_device_name 的 TextView
+        binding.tvDeviceName.text = getString(R.string.Projection_TV,  WaxPlayService._config.nickName)
+        binding.tvMirroringName.text =  WaxPlayService._config.nickName
+        binding.tvSelectDeviceName.text = WaxPlayService._config.nickName
 
     }
 
 
     fun initSdk() {
 
-        Global.RES_app_icon = com.waxrain.airplaydmr_SDK.R.drawable.icon
+        Global.RES_app_icon = R.drawable.tiffany_1024
         Global.RES_service_notify_info =
             getString(com.waxrain.airplaydmr_SDK.R.string.service_notify_info)
         Global.RES_STRING_service_confliction =
@@ -70,7 +73,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
             com.waxrain.airplaydmr_SDK.R.string.set_hidden_setting_enabled
         Global.RES_STRING_set_hidden_setting_enabled2 =
             com.waxrain.airplaydmr_SDK.R.string.set_hidden_setting_enabled2
-        Global.RES_app_name = "CastSDK"
+        Global.RES_app_name = getString(R.string.app_name)
         Global.RES_LAYOUT_toast_hws = com.waxrain.airplaydmr_SDK.R.layout.waxplayer_toast_hws
         Global.RES_DRAWABLE_filetype_generic =
             com.waxrain.airplaydmr_SDK.R.drawable.filetype_generic
@@ -235,7 +238,6 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         return null // 如果不是 Wi-Fi 连接，返回 null
     }
 
-    // 在你的 Activity 或 Fragment 中
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
             if (isGranted) {
@@ -254,10 +256,61 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
-    // 将这个函数添加到 MainActivity 类的外部或内部都可以
+    @SuppressLint("MissingPermission")
+    fun getDeviceName(context: Context): String {
+        // 方案 1: 【最高优先级】通过拼接 SDK 的属性来重构完整的服务名称
+        try {
+            // 确保 Config 的实例存在
+            if (WaxPlayService._config == null) {
+                WaxPlayService._config = Config(context.applicationContext)
+            }
 
-    // 建议将 getDeviceName 放在类的外面，作为一个顶层函数
-    fun getDeviceName(): String {
+            val sdkConfig = WaxPlayService._config
+
+            //  分别获取基础名称 (nickName) 和随机码后缀 (srv_name_ext)
+            val baseName = sdkConfig.nickName
+            val nameExtension = sdkConfig.btHidDevName
+
+            // 检查 nickName 是否有效
+            if (!baseName.isNullOrEmpty()) {
+                // 如果后缀也存在，则将它们拼接成完整的名称
+                return if (!nameExtension.toString().isNullOrEmpty()) {
+                    "${baseName}_${nameExtension}" // <-- 拼接成 "HEATCast_62209F"
+                } else {
+                    baseName // 如果没有后缀，则只返回基础名称
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("DeviceInfo", "从 SDK 获取名称失败", e)
+        }
+
+        // --- 如果方案 1 失败，则执行下面的备用方案 ---
+
+        // 方案 2: 尝试获取全局设置中的设备名称
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val deviceName = android.provider.Settings.Global.getString(
+                context.contentResolver,
+                android.provider.Settings.Global.DEVICE_NAME
+            )
+            if (!deviceName.isNullOrEmpty()) {
+                return deviceName
+            }
+        }
+
+        // 方案 3: 尝试获取蓝牙名称
+        try {
+            val bluetoothName = android.provider.Settings.Secure.getString(
+                context.contentResolver,
+                "bluetooth_name"
+            )
+            if (!bluetoothName.isNullOrEmpty()) {
+                return bluetoothName
+            }
+        } catch (e: Exception) {
+            // 忽略异常
+        }
+
+        // 方案 4: 回退到最后的备用方法
         val manufacturer = Build.MANUFACTURER
         val model = Build.MODEL
         if (model.lowercase().startsWith(manufacturer.lowercase())) {
@@ -266,6 +319,66 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         return "$manufacturer $model"
     }
 
+
+    fun getWifiNames(context: Context): String? {
+        // 1. 权限检查：这是最关键的第一步
+        val hasLocationPermission = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (!hasLocationPermission) {
+            // 如果没有精确位置权限，直接返回 null 或一个提示信息
+            Log.e("WifiInfo", "无法获取Wi-Fi名称，因为缺少 ACCESS_FINE_LOCATION 权限")
+            return null
+        }
+
+        // 2. 使用正确的 API 获取 ConnectivityManager
+        val connectivityManager =
+            context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+                ?: return null
+
+        // 3. 检查当前网络是否是 Wi-Fi
+        val activeNetwork = connectivityManager.activeNetwork ?: return null
+        val networkCapabilities =
+            connectivityManager.getNetworkCapabilities(activeNetwork) ?: return null
+        val isWifi = networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+
+        if (!isWifi) {
+            Log.d("WifiInfo", "当前连接的不是 Wi-Fi 网络")
+            return null // 如果不是 Wi-Fi，返回 null
+        }
+
+        // 4. 根据 Android 版本使用不同的方法获取 SSID
+        val wifiName = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Android 10 (API 29) 及以上
+            // 从 networkCapabilities 中获取 transportInfo
+            val transportInfo = networkCapabilities.transportInfo
+            if (transportInfo is WifiInfo) {
+                // WifiInfo.getSSID() 返回的 SSID 带有双引号，需要移除
+                transportInfo.ssid.trim { it == '"' }
+            } else {
+                null
+            }
+        } else {
+            // Android 9 (API 28) 及以下
+            val wifiManager =
+                context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+
+            @Suppress("DEPRECATION")
+            val connectionInfo = wifiManager?.connectionInfo
+            // 同样，移除双引号
+            connectionInfo?.ssid?.trim { it == '"' }
+        }
+
+        // 5. 处理获取失败的特殊情况
+        if (wifiName.isNullOrEmpty() || wifiName.equals("<unknown ssid>", ignoreCase = true)) {
+            Log.w("WifiInfo", "获取到的 SSID 为空或 <unknown ssid>，请检查位置服务是否开启")
+            return null
+        }
+
+        return wifiName
+    }
 
     override fun onRestart() {
         super.onRestart()

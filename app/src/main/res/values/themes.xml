@@ -5,8 +5,8 @@
 
 
     <style name="AppTheme" parent="android:Theme.Light">
-        <item name="android:windowBackground">@drawable/tiffany</item>
-        <item name="colorPrimary">@color/purple_200</item>
+        <item name="android:windowBackground">@drawable/heat_splash</item>
+        <item name="colorPrimary">@color/black</item>
         <item name="android:windowNoTitle">true</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowFullscreen">true</item>
