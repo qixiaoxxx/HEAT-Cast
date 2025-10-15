@@ -1,10 +1,12 @@
 package com.example.heatcast.ui
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -12,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.heatcast.BaseDataBindingActivity
 import com.example.heatcast.R
 import com.example.heatcast.databinding.ActivityMainBinding
+import com.example.heatcast.ui.popwindow.PopWindowManager
 import com.example.heatcast.util.WifiHelper
 import com.example.heatcast.util.getAndroidId
 import com.example.heatcast.util.getDeviceName
@@ -22,11 +25,17 @@ import com.waxrain.ui.WaxPlayer
 import com.waxrain.utils.Config
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import kotlin.system.exitProcess
 
 @AndroidEntryPoint
 class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
 
     private val mainViewModel by viewModels<MainViewModel>()
+    private var lastBackPressedTime: Long = 0 // 时间戳变量
+
+    private val popupWindowManager by lazy {
+        PopWindowManager(this)
+    }
 
     override fun getLayoutId(): Int = R.layout.activity_main
 
@@ -214,6 +223,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
     }
 
 
+    @SuppressLint("SetTextI18n")
     fun setWifiName() {
         val wifiHelper = WifiHelper(this)
         lifecycleScope.launch {
@@ -230,16 +240,22 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         }
     }
 
-
-    override fun onRestart() {
-        super.onRestart()
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - lastBackPressedTime < 2000) {
+                popupWindowManager.showExitPopUpWindow {
+                    lifecycleScope.launch {
+                        finishAffinity()
+                        exitProcess(0)
+                    }
+                }
+            } else {
+                lastBackPressedTime = currentTime
+            }
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
-    override fun onPause() {
-        super.onPause()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-    }
 }
