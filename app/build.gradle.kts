@@ -10,13 +10,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.heatcast"
+    namespace = "com.mcast.heat"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "com.example.heatcast"
+        applicationId = "com.mcast.heat"
         minSdk = 24
         targetSdk = 36
         versionCode = 1

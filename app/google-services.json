@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "318239907725",
-    "project_id": "cast-eaae4",
-    "storage_bucket": "cast-eaae4.firebasestorage.app"
+    "project_number": "664565912577",
+    "project_id": "cast-bf21b",
+    "storage_bucket": "cast-bf21b.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:318239907725:android:cc75afe13464417a7627c4",
+        "mobilesdk_app_id": "1:664565912577:android:3133d47a2d66f232db1c00",
         "android_client_info": {
-          "package_name": "com.example.heatcast"
+          "package_name": "com.mcast.heat"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyB1qXP8ne4mW9CP7aZSh08Skn3igKL7PGU"
+          "current_key": "AIzaSyAdNXV4WUPFH2pKg46C0boAOdQ2lIjHNCs"
         }
       ],
       "services": {
