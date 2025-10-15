@@ -55,7 +55,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
 
     fun initSdk() {
 
-        Global.RES_app_icon = R.drawable.tiffany_1024
+        Global.RES_app_icon = R.drawable.tiffany_512
         Global.RES_service_notify_info =
             getString(com.waxrain.airplaydmr_SDK.R.string.service_notify_info)
         Global.RES_STRING_service_confliction =
@@ -99,15 +99,15 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
 //		Global.RES_STRING_all_audios = R.string.all_audios;
 //		Global.RES_STRING_all_images = R.string.all_images;
 //		Global.RES_STRING_all_docs = R.string.all_docs;
-        Global.RES_layout_dialog_alert = com.waxrain.airplaydmr_SDK.R.layout.dialog_alert
+        Global.RES_layout_dialog_alert = R.layout.dialog_exit
         Global.RES_style_WaxDialog = com.waxrain.airplaydmr_SDK.R.style.WaxDialog
         Global.RES_style_About_dialog = com.waxrain.airplaydmr_SDK.R.style.About_dialog
         Global.RES_id_adg_root_view = com.waxrain.airplaydmr_SDK.R.id.adg_root_view
         Global.RES_id_adg_title_text = com.waxrain.airplaydmr_SDK.R.id.adg_title_text
         Global.RES_id_adg_message = com.waxrain.airplaydmr_SDK.R.id.adg_message
         Global.RES_id_adg_messageP = com.waxrain.airplaydmr_SDK.R.id.adg_messageP
-        Global.RES_id_adg_confirm_btn = com.waxrain.airplaydmr_SDK.R.id.adg_confirm_btn
-        Global.RES_id_adg_cancel_btn = com.waxrain.airplaydmr_SDK.R.id.adg_cancel_btn
+        Global.RES_id_adg_confirm_btn = R.id.bt_Confirm
+        Global.RES_id_adg_cancel_btn = R.id.bt_Cancel
         Global.RES_id_adg_left_padding = com.waxrain.airplaydmr_SDK.R.id.adg_left_padding
         Global.RES_id_adg_right_padding = com.waxrain.airplaydmr_SDK.R.id.adg_right_padding
         Global.RES_id_adg_bgview = com.waxrain.airplaydmr_SDK.R.id.adg_bgview
