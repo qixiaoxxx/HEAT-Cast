@@ -1,15 +1,69 @@
 package com.example.heatcast.util
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.net.wifi.WifiManager
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
+import androidx.core.content.ContextCompat
 import com.waxrain.airplaydmr.WaxPlayService
 import com.waxrain.utils.Config
 import java.net.NetworkInterface
 import java.util.Collections
 
+
+
+/**
+ * 获取当前连接的 Wi-Fi 名称 (SSID)。
+ */
+fun getWifiName(context: Context): String? {
+    //  检查最关键的权限
+    if (ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) != PackageManager.PERMISSION_GRANTED
+    ) {
+        Log.w("WifiInfo", "权限不足 (ACCESS_FINE_LOCATION)，无法获取 Wi-Fi 名称。")
+        return "权限不足"
+    }
+
+    //  获取 ConnectivityManager
+    val connectivityManager =
+        context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+            ?: return null
+
+    //  检查网络状态并确认是 Wi-Fi
+    val activeNetwork = connectivityManager.activeNetwork ?: return null
+    val networkCapabilities =
+        connectivityManager.getNetworkCapabilities(activeNetwork) ?: return null
+
+    if (!networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+        Log.d("WifiInfo", "当前活跃网络不是 Wi-Fi。")
+        return null // 如果不是 Wi-Fi 连接，则返回 null
+    }
+
+    //  获取 Wi-Fi 名称 (SSID)
+    // 从 Android 8.1 (API 27) 开始，推荐使用 WifiManager 来获取
+    val wifiManager =
+        context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+            ?: return null
+
+    // connectionInfo 在拥有 ACCESS_FINE_LOCATION 权限时是可靠的
+    val wifiInfo = wifiManager.connectionInfo
+
+    // wifiInfo.ssid 返回的名称可能包含双引号，例如 "<unknown ssid>" 或 "\"MyWiFi\""
+    if (wifiInfo != null && !wifiInfo.ssid.isNullOrEmpty() && wifiInfo.ssid != "<unknown ssid>") {
+        // 移除 SSID 名称前后的双引号
+        return wifiInfo.ssid.trim { it == '"' }
+    }
+
+    return null
+}
 
 
 /**

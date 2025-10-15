@@ -57,7 +57,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
 
     fun initSdk() {
 
-        Global.RES_app_icon = R.drawable.tiffany_1024
+        Global.RES_app_icon = R.drawable.tiffany_512
         Global.RES_service_notify_info =
             getString(com.waxrain.airplaydmr_SDK.R.string.service_notify_info)
         Global.RES_STRING_service_confliction =
