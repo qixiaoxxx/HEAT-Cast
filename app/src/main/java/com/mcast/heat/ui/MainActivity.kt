@@ -387,8 +387,14 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
+        if (!Global.serviceExiting) Global.serviceExiting = true
+        try { // java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState
+            this.onBackPressed()
+            this.finish()
+        } catch (e: java.lang.Exception) {
+        }
         popupWindowManager.hideAllPopWindow()
+        super.onDestroy()
     }
 
 }
