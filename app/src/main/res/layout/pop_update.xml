@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/cast_color_33000000">
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="504dp"
+        android:layout_height="380dp"
+        android:layout_marginTop="80dp"
+        android:background="@drawable/bg_exit"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/iv_logo"
+        android:layout_width="85dp"
+        android:layout_height="85dp"
+        android:layout_marginTop="12dp"
+        android:src="@drawable/tiffany_512"
+        app:layout_constraintEnd_toEndOf="@id/view"
+        app:layout_constraintStart_toStartOf="@id/view"
+        app:layout_constraintTop_toTopOf="@id/view" />
+
+    <TextView
+        android:id="@+id/tv_new_version_update"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="New_Version_Update"
+        android:textColor="@color/cast_color_FFFFFF"
+        android:textSize="22sp"
+        app:layout_constraintEnd_toEndOf="@id/view"
+        app:layout_constraintStart_toStartOf="@id/view"
+        app:layout_constraintTop_toBottomOf="@id/iv_logo" />
+
+    <TextView
+        android:id="@+id/tv_version_code"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textColor="@color/cast_color_FFFFFF"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@id/view"
+        app:layout_constraintStart_toStartOf="@id/view"
+        app:layout_constraintTop_toBottomOf="@id/tv_new_version_update"
+        tools:text="V1.2.1" />
+
+    <TextView
+        android:id="@+id/tv_update"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="26dp"
+        android:layout_marginTop="12dp"
+        android:text="Update_Content"
+        android:textColor="@color/cast_color_FFFFFF"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@id/view"
+        app:layout_constraintTop_toBottomOf="@id/tv_version_code" />
+
+    <TextView
+        android:id="@+id/tv_update_log"
+        android:layout_width="444dp"
+        android:layout_height="97dp"
+        android:layout_marginTop="12dp"
+        android:textColor="@color/cast_color_FFFFFF"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@id/view"
+        app:layout_constraintHorizontal_bias="0.458"
+        app:layout_constraintStart_toStartOf="@id/view"
+        app:layout_constraintTop_toBottomOf="@id/tv_update"
+        tools:text="update" />
+
+    <Button
+        android:id="@+id/skip"
+        android:layout_width="124dp"
+        android:layout_height="42dp"
+        android:layout_marginStart="26dp"
+        android:layout_marginBottom="21dp"
+        android:background="@drawable/selector_exit_bt"
+        android:gravity="center"
+        android:text="Skip"
+        android:textAllCaps="false"
+        android:textColor="@drawable/tc_exit_bt"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@id/view"
+        app:layout_constraintStart_toStartOf="@id/view" />
+
+    <Button
+        android:id="@+id/Ignore_updates"
+        android:layout_width="124dp"
+        android:layout_height="42dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginBottom="21dp"
+        android:background="@drawable/selector_exit_bt"
+        android:gravity="center"
+        android:text="Ignore_Updates"
+        android:textAllCaps="false"
+        android:textColor="@drawable/tc_exit_bt"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@id/view"
+        app:layout_constraintStart_toEndOf="@id/skip" />
+
+    <Button
+        android:id="@+id/Install_now"
+        android:layout_width="149dp"
+        android:layout_height="42dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="26dp"
+        android:layout_marginBottom="21dp"
+        android:background="@drawable/selector_exit_bt"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:gravity="center"
+        android:text="Install_Now"
+        android:textAllCaps="false"
+        android:textColor="@drawable/tc_exit_bt"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@id/view"
+        app:layout_constraintEnd_toEndOf="@id/view" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

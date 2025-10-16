@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_bg"
+        android:layout_width="234dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_exit"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/siv_logo"
+            android:layout_width="64px"
+            android:layout_height="64px"
+            android:layout_marginStart="10px"
+            android:scaleType="centerCrop"
+            android:src="@drawable/tiffany_512"
+            app:layout_constraintBottom_toBottomOf="@id/cl_bg"
+            app:layout_constraintStart_toStartOf="@id/cl_bg"
+            app:layout_constraintTop_toTopOf="@id/cl_bg"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.RoundedSquare" />
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="false"
+            android:indeterminateOnly="false"
+            android:indeterminateTint="@color/purple_200"
+            android:max="100"
+            android:progress="0"
+            app:indicatorColor="@color/purple_200"
+            app:indicatorInset="0dp"
+            app:indicatorSize="36dp"
+            app:layout_constraintBottom_toBottomOf="@id/siv_logo"
+            app:layout_constraintEnd_toEndOf="@id/siv_logo"
+            app:layout_constraintStart_toStartOf="@id/siv_logo"
+            app:layout_constraintTop_toTopOf="@id/siv_logo"
+            app:trackColor="@color/purple_700"
+            app:trackCornerRadius="20dp"
+            app:trackThickness="2dp" />
+
+        <TextView
+            android:id="@+id/tv_progress_second"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="14dp"
+            android:textColor="@color/cast_color_FFFFFF"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="@id/tv_progress_downloaded"
+            app:layout_constraintEnd_toStartOf="@id/tv_progress_downloaded"
+            app:layout_constraintTop_toTopOf="@id/tv_progress_downloaded"
+            tools:text="24Kb/s" />
+
+        <TextView
+            android:id="@+id/tv_progress_downloaded"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_marginEnd="24dp"
+            android:textColor="@color/cast_color_FFFFFF"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="20KB/113.42M" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

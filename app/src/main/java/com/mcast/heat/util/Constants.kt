@@ -3,19 +3,22 @@ package com.mcast.heat.util
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.Uri
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import com.waxrain.airplaydmr.WaxPlayService
 import com.waxrain.utils.Config
+import java.io.File
 import java.net.NetworkInterface
 import java.util.Collections
-
 
 
 /**
@@ -131,3 +134,36 @@ fun getAndroidId(context: Context): String {
         Settings.Secure.ANDROID_ID
     )
 }
+
+
+//安装apk
+fun Context.installApk(apkPath: String) {
+    val apkFile = File(apkPath)
+    if (!apkFile.exists()) {
+        Log.e("InstallApk", "APK file does not exist: $apkPath")
+        return
+    }
+
+    val fileProvider = "$packageName.fileProvider"
+    val intent = Intent(Intent.ACTION_VIEW)
+    intent.addCategory(Intent.CATEGORY_DEFAULT)
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    val type = "application/vnd.android.package-archive"
+
+    val uri: Uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        FileProvider.getUriForFile(this, fileProvider, apkFile).also {
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+    } else {
+        Uri.fromFile(apkFile)
+    }
+
+    intent.setDataAndType(uri, type)
+
+    try {
+        startActivity(intent)
+    } catch (e: Exception) {
+        Log.e("InstallApk", "Error installing APK", e)
+    }
+}
+

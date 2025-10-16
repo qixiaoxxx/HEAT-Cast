@@ -2,7 +2,10 @@ package com.mcast.heat.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -10,15 +13,23 @@ import android.view.KeyEvent
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.mcast.heat.BaseDataBindingActivity
+import com.mcast.heat.BuildConfig
 import com.mcast.heat.R
+import com.mcast.heat.data.config.HeaderConfig
 import com.mcast.heat.databinding.ActivityMainBinding
+import com.mcast.heat.manager.Download
 import com.mcast.heat.ui.popwindow.PopWindowManager
 import com.mcast.heat.util.WifiHelper
 import com.mcast.heat.util.getAndroidId
 import com.mcast.heat.util.getDeviceName
+import com.mcast.heat.util.getInt
+import com.mcast.heat.util.installApk
+import com.mcast.heat.util.saveInt
 import com.waxrain.airplaydmr.WaxPlayService
 import com.waxrain.droidsender.delegate.Global
 import com.waxrain.ui.WaxPlayer
@@ -27,11 +38,15 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 
+
 @AndroidEntryPoint
 class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
 
     private val mainViewModel by viewModels<MainViewModel>()
+
     private var lastBackPressedTime: Long = 0 // 时间戳变量
+
+    private var downloadUrl: String? = null
 
     private val popupWindowManager by lazy {
         PopWindowManager(this)
@@ -49,6 +64,9 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         FirebaseAnalytics.getInstance(this@MainActivity)
             .logEvent(FirebaseAnalytics.Event.APP_OPEN, bundle)
 
+        // 初始化请求头
+        HeaderConfig.init(application)
+
         initSdk()
         startSdk()
 
@@ -58,9 +76,47 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         binding.tvMirroringName.text = deviceName
         binding.tvSelectDeviceName.text = deviceName
 
-
         //  请求权限以获取 Wi-Fi 名称
         askForLocationPermission()
+
+        var version_code = 0
+        lifecycleScope.launch {
+            version_code = getInt(this@MainActivity, "versionCode") ?: 0
+        }
+
+        //判断最新版本是否大于当前版本 并且 强制升级版本大于等于当前版本 或 最新版本是否大于需要跳过的版本
+        mainViewModel.updateInfo.observe(this) {
+            val latestVersionCode = it.release?.versionCode ?: 0
+            if (latestVersionCode > BuildConfig.VERSION_CODE && ((it.incompatibleVersion
+                    ?: 0) >= BuildConfig.VERSION_CODE || latestVersionCode > version_code)
+            ) {
+                lifecycleScope.launch {
+                    if (Download.isDownloading.not()) {
+                        popupWindowManager.showUpDatePopUpWindow(it.release?.changeLog ?: "", {
+                            //升级
+                            checkAndRequestPermissions(this@MainActivity, it.release?.url ?: "")
+                            downloadUrl = it.release?.url ?: ""
+                            Log.i(
+                                "Download",
+                                "MainActivity: downloadUrl ${it.release?.url ?: ""}"
+                            )
+                        }) {
+                            //强制升级版本小于当前版本
+                            if ((it.incompatibleVersion ?: 0) < BuildConfig.VERSION_CODE) {
+                                lifecycleScope.launch {
+                                    saveInt(
+                                        this@MainActivity,
+                                        "versionCode",
+                                        it.release?.versionCode ?: 0
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
     }
 
 
@@ -256,6 +312,83 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
             return true
         }
         return super.onKeyDown(keyCode, event)
+    }
+
+    /**
+     * 下载安装
+     */
+    private fun startDownload(url: String) {
+        popupWindowManager.showUpDateProgressPopUpWindow(
+            0, "0.0K/s", "0.0M", "0.0M"
+        )
+        lifecycleScope.launch {
+            Download.downloadFile(url, this@MainActivity).collect {
+                popupWindowManager.upDateProgressPopUpWindow(
+                    it.progress,
+                    it.perSecondBytes,
+                    it.bytesRead,
+                    it.totalSize
+                )
+                Log.i(
+                    "Download",
+                    "MainActivity: progress ${it.progress} perSecondBytes ${it.perSecondBytes} bytesRead ${it.bytesRead} totalSize ${it.totalSize}"
+                )
+                if (it.isDone) {
+                    popupWindowManager.hideUpDateProgressPopUpWindow()
+                    installApk(it.filePath)
+                }
+            }
+        }
+    }
+
+    private fun checkAndRequestPermissions(context: Context, url: String) {
+        val permissions = arrayOf(
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        )
+        val listPermissionsNeeded = ArrayList<String>()
+        for (permission in permissions) {
+            if (ContextCompat.checkSelfPermission(
+                    context,
+                    permission
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                listPermissionsNeeded.add(permission)
+            }
+        }
+        if (listPermissionsNeeded.isNotEmpty()) {
+            ActivityCompat.requestPermissions(
+                context as Activity,
+                listPermissionsNeeded.toTypedArray(),
+                100
+            )
+        } else {
+            // Permissions already granted, continue with installation
+            startDownload(url)
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 100) {
+            if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+                // 权限已获取，继续下载
+                downloadUrl?.let {
+                    startDownload(it)
+                }
+            } else {
+                Log.e("Permissions", "Permissions not granted")
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        popupWindowManager.hideAllPopWindow()
     }
 
 }

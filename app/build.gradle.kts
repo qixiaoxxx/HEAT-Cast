@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.secrets)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.kotlin.services)
     alias(libs.plugins.firebase.crashlytics)
 }
 
@@ -15,25 +16,40 @@ android {
         version = release(36)
     }
 
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
+
     defaultConfig {
         applicationId = "com.mcast.heat"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
+        versionCode = 110
         versionName = "250730"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("mcast.jks")
+            storePassword = "mcast-NDYtDi5Jd%E"
+            keyAlias = "mcast"
+            keyPassword = "mcast-NDYtDi5Jd%E"
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isShrinkResources = true
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -81,7 +97,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.ui.android)
     implementation(libs.androidx.constraintlayout)
-//    implementation(libs.converter.gson)
+    implementation(libs.converter.gson)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
@@ -89,11 +105,12 @@ dependencies {
     // To use Kotlin Symbol Processing (KSP)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
-
     implementation(libs.leanback.tab)
     implementation(libs.leanback)
     implementation(libs.leanback.grid)
-
+    implementation(libs.retrofit)
+    implementation(libs.happy.dns)
+    implementation(libs.androidx.datastore.preferences)
 
     implementation(project(":cast"))
     testImplementation(libs.junit)
@@ -109,5 +126,8 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-analytics")
+
+    implementation(libs.retrofit2.kotlinx.serialization.converter)
+
 
 }

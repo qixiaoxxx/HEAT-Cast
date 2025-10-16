@@ -12,12 +12,61 @@ class PopWindowManager(private val context: Activity) {
         window
     }
 
+    private val upDatePopUpWindow by lazy {
+        val window = UpDataPopUpWindow(context)
+        popWindowList.add(window)
+        window
+    }
+
+    private val upDateProgressPopUpWindow by lazy {
+        val window = UpDateProgressPopUpWindow(context)
+        popWindowList.add(window)
+        window
+    }
+
     fun showExitPopUpWindow(exit: () -> Unit) {
         exitPopUpWindow.exit(exit)
         exitPopUpWindow.stay()
         exitPopUpWindow.show()
     }
 
+
+    fun showUpDatePopUpWindow(
+        updateLog: String,
+        install: () -> Unit,
+        skip: () -> Unit
+    ) {
+        upDatePopUpWindow.setUpdateLog(updateLog)
+        upDatePopUpWindow.install(install)
+        upDatePopUpWindow.skip(skip)
+        upDatePopUpWindow.ignore()
+        upDatePopUpWindow.show()
+    }
+
+
+    fun showUpDateProgressPopUpWindow(
+        progress: Int,
+        second: String,
+        downloaded: String,
+        total: String
+    ) {
+        upDateProgressPopUpWindow.setUpdateProgress(progress, second, downloaded, total)
+        upDateProgressPopUpWindow.show()
+    }
+
+    fun upDateProgressPopUpWindow(
+        progress: Int,
+        second: String,
+        downloaded: String,
+        total: String
+    ) {
+        upDateProgressPopUpWindow.setUpdateProgress(progress, second, downloaded, total)
+    }
+
+
+    fun hideUpDateProgressPopUpWindow() {
+        upDateProgressPopUpWindow.dismiss()
+    }
 
     fun hideAllPopWindow() {
         popWindowList.forEach {

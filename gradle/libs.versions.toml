@@ -15,8 +15,9 @@ kotlin-android = "2.2.20"
 appcompat = "1.7.1"
 lifecycleViewmodelKtx = "2.9.4"
 databindingRuntime = "8.13.0"
+retrofit2KotlinxSerializationConverter = "1.0.0"
 secrets = "2.0.1"
-retrofit = "3.0.0"
+retrofit = "2.11.0"
 okhttp = "5.2.1"
 kotlinxSerializationJson = "1.9.0"
 uiAndroid = "1.9.3"
@@ -27,6 +28,9 @@ leanback = "1.2.0"
 leanbackGrid = "1.0.0"
 leanbackTab = "1.1.0"
 crashlytics = "3.0.6"
+happyDns = "2.0.1"
+datastorePreferences = "1.1.7"
+services = "4.4.4"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -61,6 +65,11 @@ material = { group = "com.google.android.material", name = "material", version.r
 leanback = { module = "androidx.leanback:leanback", version.ref = "leanback" }
 leanback-grid = { module = "androidx.leanback:leanback-grid", version.ref = "leanbackGrid" }
 leanback-tab = { module = "androidx.leanback:leanback-tab", version.ref = "leanbackTab" }
+happy-dns = { module = "com.qiniu:happy-dns", version.ref = "happyDns" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
+retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofit2KotlinxSerializationConverter" }
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -69,6 +78,7 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "secrets" }
+kotlin-services = { id = "com.google.gms.google-services", version.ref = "services" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin-android" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics" }
