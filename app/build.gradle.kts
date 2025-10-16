@@ -37,13 +37,21 @@ android {
             storePassword = "mcast-NDYtDi5Jd%E"
             keyAlias = "mcast"
             keyPassword = "mcast-NDYtDi5Jd%E"
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
+            enableV4Signing = true
         }
     }
 
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("release")
+        }
         release {
             isShrinkResources = true
             isMinifyEnabled = true
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
