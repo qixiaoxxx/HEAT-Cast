@@ -32,10 +32,12 @@ class PopWindowManager(private val context: Activity) {
 
 
     fun showUpDatePopUpWindow(
+        updateUI: Boolean,
         updateLog: String,
         install: () -> Unit,
         skip: () -> Unit
     ) {
+        upDatePopUpWindow.setUI(updateUI)
         upDatePopUpWindow.setUpdateLog(updateLog)
         upDatePopUpWindow.install(install)
         upDatePopUpWindow.skip(skip)

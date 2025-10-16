@@ -21,7 +21,7 @@
             android:layout_height="64px"
             android:layout_marginStart="10px"
             android:scaleType="centerCrop"
-            android:src="@drawable/tiffany_512"
+            android:src="@drawable/tiffany_1024"
             app:layout_constraintBottom_toBottomOf="@id/cl_bg"
             app:layout_constraintStart_toStartOf="@id/cl_bg"
             app:layout_constraintTop_toTopOf="@id/cl_bg"

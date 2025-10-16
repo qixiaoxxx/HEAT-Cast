@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name">HEAT Cast</string>
+    <string name="app_name" translatable="false">HEAT Cast</string>
 
     <string name="Projection_TV" translatable="false">Projection TV: %s</string>
 
@@ -8,5 +8,10 @@
     <string name="Confirm" translatable="false">Confirm</string>
 
     <string name="Cancel" translatable="false">Cancel</string>
+    <string name="New_Version_Update" translatable="false">New Version Update</string>
+    <string name="Update_Content" translatable="false">Update Content</string>
+    <string name="Skip" translatable="false">Skip</string>
+    <string name="Ignore_Updates" translatable="false">Ignore Updates</string>
+    <string name="Install_Now" translatable="false">Install_Now</string>
 
 </resources>

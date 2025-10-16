@@ -22,7 +22,7 @@
         android:layout_marginStart="42px"
         android:layout_marginTop="32px"
         android:scaleType="centerCrop"
-        android:src="@drawable/tiffany_512"
+        android:src="@drawable/tiffany_1024"
         app:layout_constraintStart_toStartOf="@id/v_exit_bg"
         app:layout_constraintTop_toTopOf="@id/v_exit_bg"
         app:shapeAppearanceOverlay="@style/ShapeAppearance.App.RoundedSquare" />

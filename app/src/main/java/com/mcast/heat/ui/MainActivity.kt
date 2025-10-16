@@ -87,20 +87,22 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         //判断最新版本是否大于当前版本 并且 强制升级版本大于等于当前版本 或 最新版本是否大于需要跳过的版本
         mainViewModel.updateInfo.observe(this) {
             val latestVersionCode = it.release?.versionCode ?: 0
-            if (latestVersionCode > BuildConfig.VERSION_CODE && ((it.incompatibleVersion
-                    ?: 0) >= BuildConfig.VERSION_CODE || latestVersionCode > version_code)
+            val isForcedUpdate = (it.incompatibleVersion ?: 0) >= BuildConfig.VERSION_CODE
+            if (latestVersionCode > BuildConfig.VERSION_CODE && (isForcedUpdate || latestVersionCode > version_code)
             ) {
                 lifecycleScope.launch {
                     if (Download.isDownloading.not()) {
-                        popupWindowManager.showUpDatePopUpWindow(it.release?.changeLog ?: "", {
-                            //升级
-                            checkAndRequestPermissions(this@MainActivity, it.release?.url ?: "")
-                            downloadUrl = it.release?.url ?: ""
-                            Log.i(
-                                "Download",
-                                "MainActivity: downloadUrl ${it.release?.url ?: ""}"
-                            )
-                        }) {
+                        popupWindowManager.showUpDatePopUpWindow(
+                            isForcedUpdate,
+                            it.release?.changeLog ?: "",
+                            {
+                                checkAndRequestPermissions(this@MainActivity, it.release?.url ?: "")
+                                downloadUrl = it.release?.url ?: ""
+                                Log.i(
+                                    "Download",
+                                    "MainActivity: downloadUrl ${it.release?.url ?: ""}"
+                                )
+                            }) {
                             //强制升级版本小于当前版本
                             if ((it.incompatibleVersion ?: 0) < BuildConfig.VERSION_CODE) {
                                 lifecycleScope.launch {
@@ -122,7 +124,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
 
     fun initSdk() {
 
-        Global.RES_app_icon = R.drawable.tiffany_512
+        Global.RES_app_icon = R.drawable.tiffany_1024
         Global.RES_service_notify_info =
             getString(com.waxrain.airplaydmr_SDK.R.string.service_notify_info)
         Global.RES_STRING_service_confliction =

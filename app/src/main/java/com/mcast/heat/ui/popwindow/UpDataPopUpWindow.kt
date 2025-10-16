@@ -14,6 +14,16 @@ class UpDataPopUpWindow(context: Activity) : BaseNormalPopWindow(
     ViewGroup.LayoutParams.MATCH_PARENT,
     ViewGroup.LayoutParams.MATCH_PARENT
 ) {
+    fun setUI(updateUI: Boolean) {
+        if (updateUI) {
+            view.findViewById<View>(R.id.skip).visibility = View.GONE
+            view.findViewById<View>(R.id.Ignore_updates).visibility = View.GONE
+        } else {
+            view.findViewById<View>(R.id.skip).visibility = View.VISIBLE
+            view.findViewById<View>(R.id.Ignore_updates).visibility = View.VISIBLE
+        }
+    }
+
     fun setUpdateLog(updateLog: String) {
         view.findViewById<TextView>(R.id.tv_update_log).text = updateLog
     }
