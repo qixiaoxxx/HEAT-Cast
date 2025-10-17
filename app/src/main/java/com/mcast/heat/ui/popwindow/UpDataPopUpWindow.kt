@@ -18,14 +18,25 @@ class UpDataPopUpWindow(context: Activity) : BaseNormalPopWindow(
         if (updateUI) {
             view.findViewById<View>(R.id.skip).visibility = View.GONE
             view.findViewById<View>(R.id.Ignore_updates).visibility = View.GONE
+            view.findViewById<View>(R.id.Install_now).visibility = View.GONE
+            view.findViewById<View>(R.id.Install_now_center).visibility = View.VISIBLE
         } else {
             view.findViewById<View>(R.id.skip).visibility = View.VISIBLE
             view.findViewById<View>(R.id.Ignore_updates).visibility = View.VISIBLE
+            view.findViewById<View>(R.id.Install_now).visibility = View.VISIBLE
+            view.findViewById<View>(R.id.Install_now_center).visibility = View.GONE
         }
     }
 
     fun setUpdateLog(updateLog: String) {
         view.findViewById<TextView>(R.id.tv_update_log).text = updateLog
+    }
+
+    fun installCenter(install: () -> Unit) {
+        view.findViewById<View>(R.id.Install_now_center).setOnClickListener {
+            install()
+            dismiss()
+        }
     }
 
     fun install(install: () -> Unit) {

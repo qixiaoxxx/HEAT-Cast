@@ -9,8 +9,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.KeyEvent
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.app.ActivityCompat
@@ -43,13 +43,15 @@ import kotlin.system.exitProcess
 class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
 
     private val mainViewModel by viewModels<MainViewModel>()
-
-    private var lastBackPressedTime: Long = 0 // 时间戳变量
-
     private var downloadUrl: String? = null
-
+    private var backPressCount = 0
     private val popupWindowManager by lazy {
         PopWindowManager(this)
+    }
+    private val callback = object : OnBackPressedCallback(false) {
+        override fun handleOnBackPressed() {
+            handleBackPress()
+        }
     }
 
     override fun getLayoutId(): Int = R.layout.activity_main
@@ -88,19 +90,15 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         mainViewModel.updateInfo.observe(this) {
             val latestVersionCode = it.release?.versionCode ?: 0
             val isForcedUpdate = (it.incompatibleVersion ?: 0) >= BuildConfig.VERSION_CODE
-            if (latestVersionCode > BuildConfig.VERSION_CODE && (isForcedUpdate || latestVersionCode > version_code)
-            ) {
+            if (latestVersionCode > BuildConfig.VERSION_CODE && (isForcedUpdate || latestVersionCode > version_code)) {
                 lifecycleScope.launch {
                     if (Download.isDownloading.not()) {
                         popupWindowManager.showUpDatePopUpWindow(
-                            isForcedUpdate,
-                            it.release?.changeLog ?: "",
-                            {
+                            isForcedUpdate, it.release?.changeLog ?: "", {
                                 checkAndRequestPermissions(this@MainActivity, it.release?.url ?: "")
                                 downloadUrl = it.release?.url ?: ""
                                 Log.i(
-                                    "Download",
-                                    "MainActivity: downloadUrl ${it.release?.url ?: ""}"
+                                    "Download", "MainActivity: downloadUrl ${it.release?.url ?: ""}"
                                 )
                             }) {
                             //强制升级版本小于当前版本
@@ -118,6 +116,8 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
                 }
             }
         }
+        callback.isEnabled = true
+        onBackPressedDispatcher.addCallback(this, callback)
 
     }
 
@@ -298,22 +298,17 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         }
     }
 
-    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            val currentTime = System.currentTimeMillis()
-            if (currentTime - lastBackPressedTime < 2000) {
-                popupWindowManager.showExitPopUpWindow {
-                    lifecycleScope.launch {
-                        finishAffinity()
-                        exitProcess(0)
-                    }
+    private fun handleBackPress() {
+        backPressCount++
+        if (backPressCount >= 2) {
+            backPressCount = 0
+            popupWindowManager.showExitPopUpWindow {
+                lifecycleScope.launch {
+                    finishAffinity()
+                    exitProcess(0)
                 }
-            } else {
-                lastBackPressedTime = currentTime
             }
-            return true
         }
-        return super.onKeyDown(keyCode, event)
     }
 
     /**

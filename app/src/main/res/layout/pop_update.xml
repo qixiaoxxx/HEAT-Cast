@@ -8,10 +8,10 @@
 
     <View
         android:id="@+id/view"
-        android:layout_width="504dp"
+        android:layout_width="924px"
         android:layout_height="380dp"
-        android:layout_marginTop="80dp"
         android:background="@drawable/bg_exit"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -77,41 +77,42 @@
 
     <Button
         android:id="@+id/skip"
-        android:layout_width="124dp"
-        android:layout_height="42dp"
-        android:layout_marginStart="26dp"
-        android:layout_marginBottom="21dp"
+        android:layout_width="220px"
+        android:layout_height="96px"
+        android:layout_marginStart="42px"
+        android:layout_marginBottom="36px"
         android:background="@drawable/selector_exit_bt"
         android:gravity="center"
         android:text="@string/Skip"
         android:textAllCaps="false"
         android:textColor="@drawable/tc_exit_bt"
-        android:textSize="14sp"
+        android:textSize="32px"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@id/view"
         app:layout_constraintStart_toStartOf="@id/view" />
 
     <Button
         android:id="@+id/Ignore_updates"
-        android:layout_width="124dp"
-        android:layout_height="42dp"
-        android:layout_marginStart="12dp"
-        android:layout_marginBottom="21dp"
+        android:layout_width="260px"
+        android:layout_height="96px"
         android:background="@drawable/selector_exit_bt"
         android:gravity="center"
         android:text="@string/Ignore_Updates"
         android:textAllCaps="false"
         android:textColor="@drawable/tc_exit_bt"
-        android:textSize="14sp"
-        app:layout_constraintBottom_toBottomOf="@id/view"
-        app:layout_constraintStart_toEndOf="@id/skip" />
+        android:textSize="32px"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/skip"
+        app:layout_constraintEnd_toStartOf="@id/Install_now"
+        app:layout_constraintStart_toEndOf="@id/skip"
+        app:layout_constraintTop_toTopOf="@id/skip" />
 
     <Button
         android:id="@+id/Install_now"
-        android:layout_width="149dp"
-        android:layout_height="42dp"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="26dp"
-        android:layout_marginBottom="21dp"
+        android:layout_width="320px"
+        android:layout_height="96px"
+        android:layout_marginEnd="42px"
+        android:layout_marginBottom="36px"
         android:background="@drawable/selector_exit_bt"
         android:focusable="true"
         android:focusableInTouchMode="true"
@@ -119,8 +120,30 @@
         android:text="@string/Install_Now"
         android:textAllCaps="false"
         android:textColor="@drawable/tc_exit_bt"
-        android:textSize="14sp"
+        android:textSize="32px"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@id/view"
         app:layout_constraintEnd_toEndOf="@id/view" />
+
+
+    <Button
+        android:id="@+id/Install_now_center"
+        android:layout_width="320px"
+        android:layout_height="96px"
+        android:layout_marginEnd="42px"
+        android:layout_marginBottom="36px"
+        android:background="@drawable/selector_exit_bt"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:gravity="center"
+        android:text="@string/Install_Now"
+        android:textAllCaps="false"
+        android:textColor="@drawable/tc_exit_bt"
+        android:textSize="32px"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/view"
+        app:layout_constraintEnd_toEndOf="@id/view"
+        app:layout_constraintStart_toStartOf="@id/view" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

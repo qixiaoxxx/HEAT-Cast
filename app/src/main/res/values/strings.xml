@@ -12,6 +12,6 @@
     <string name="Update_Content" translatable="false">Update Content</string>
     <string name="Skip" translatable="false">Skip</string>
     <string name="Ignore_Updates" translatable="false">Ignore Updates</string>
-    <string name="Install_Now" translatable="false">Install_Now</string>
+    <string name="Install_Now" translatable="false">Install Now</string>
 
 </resources>

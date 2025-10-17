@@ -39,6 +39,7 @@ class PopWindowManager(private val context: Activity) {
     ) {
         upDatePopUpWindow.setUI(updateUI)
         upDatePopUpWindow.setUpdateLog(updateLog)
+        upDatePopUpWindow.installCenter(install)
         upDatePopUpWindow.install(install)
         upDatePopUpWindow.skip(skip)
         upDatePopUpWindow.ignore()
