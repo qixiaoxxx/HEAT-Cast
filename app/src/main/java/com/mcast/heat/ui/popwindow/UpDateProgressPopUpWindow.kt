@@ -20,7 +20,6 @@ class UpDateProgressPopUpWindow(val context: Activity) : BaseNormalPopWindow(
         window.isFocusable = false
         window.isOutsideTouchable = true
         window.isTouchable = true
-//        view.findViewById<ProgressBar>(R.id.progress_bar).progressDrawable = CircularProgressIndicator
     }
 
     @SuppressLint("SetTextI18n")
@@ -31,7 +30,7 @@ class UpDateProgressPopUpWindow(val context: Activity) : BaseNormalPopWindow(
     }
 
     override fun show() {
-        window.showAtLocation(context.window.decorView, Gravity.TOP or Gravity.END, 0, 0)
+        window.showAtLocation(context.window.decorView, Gravity.BOTTOM or Gravity.END, 0, 0)
         window.contentView.startAnimation(scaleInAnimation)
     }
 }

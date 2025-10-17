@@ -45,7 +45,7 @@
     <application
         android:name=".CastApplication"
         android:allowBackup="true"
-        android:banner="@drawable/tiffany"
+        android:banner="@mipmap/heat320x180"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:hardwareAccelerated="true"

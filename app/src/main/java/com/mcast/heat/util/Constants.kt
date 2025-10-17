@@ -9,35 +9,30 @@ import android.provider.Settings
 import android.util.Log
 import androidx.core.content.FileProvider
 import com.waxrain.airplaydmr.WaxPlayService
-import com.waxrain.utils.Config
 import java.io.File
 import java.net.NetworkInterface
 import java.util.Collections
 import java.util.Locale
 
 /**
- * 获取并构建设备名称。
- * "HEATCast_" 来自 SDK，"xxxxxx" 是 MAC 地址的后六位。
+ * 获取并构建设备名称
+ * "HEATCast_" 固定 ，"xxxxxx" 是 MAC 地址的后六位。
  */
 @SuppressLint("MissingPermission")
 fun getDeviceName(context: Context): String {
     try {
-        if (WaxPlayService._config == null) {
-            WaxPlayService._config = Config(context.applicationContext)
-        }
-        val baseName = WaxPlayService._config.nickName
-        if (!baseName.isNullOrEmpty()) {
-            val macSuffix = getMacAddressLast6Chars()
-            if (macSuffix != null) {
-                // 成功获取基础名称和 MAC 后缀
-                return "${baseName}${macSuffix}"
-            } else {
-                // MAC 获取失败，使用 SDK 原始后缀作为备选
-                val nameExtension = WaxPlayService._config.btHidDevName
-                if (nameExtension.toString().isNotEmpty()) {
-                    return "${baseName}${nameExtension}"
-                }
+        val baseName = "HEATCast_"
+        val macSuffix = getMacAddressLast6Chars()
+        if (macSuffix != null) {
+            // 成功获取基础名称和 MAC 后缀
+            return "${baseName}${macSuffix}"
+        } else {
+            // MAC 获取失败，使用 SDK 原始后缀作为备选
+            val nameExtension = WaxPlayService._config.btHidDevName
+            if (nameExtension.toString().isNotEmpty()) {
+                return "${baseName}${nameExtension}"
             }
+
             return baseName
         }
     } catch (e: Exception) {

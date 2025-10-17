@@ -41,7 +41,6 @@ import kotlin.system.exitProcess
 class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
 
     private val mainViewModel by viewModels<MainViewModel>()
-    private var downloadUrl: String? = null
     private var backPressCount = 0
     private val popupWindowManager by lazy {
         PopWindowManager(this)
@@ -78,42 +77,6 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
 
         //  请求权限以获取 Wi-Fi 名称
         askForLocationPermission()
-
-//        var version_code = 0
-//        lifecycleScope.launch {
-//            version_code = getInt(this@MainActivity, "versionCode") ?: 0
-//        }
-
-        //判断最新版本是否大于当前版本 并且 强制升级版本大于等于当前版本 或 最新版本是否大于需要跳过的版本
-//        mainViewModel.updateInfo.observe(this) {
-//            val latestVersionCode = it.release?.versionCode ?: 0
-//            val isForcedUpdate = (it.incompatibleVersion ?: 0) >= BuildConfig.VERSION_CODE
-//            if (latestVersionCode > BuildConfig.VERSION_CODE && (isForcedUpdate || latestVersionCode > version_code)) {
-//                lifecycleScope.launch {
-//                    if (Download.isDownloading.not()) {
-//                        popupWindowManager.showUpDatePopUpWindow(
-//                            isForcedUpdate, it.release?.changeLog ?: "", {
-//                                checkAndRequestPermissions(this@MainActivity, it.release?.url ?: "")
-//                                downloadUrl = it.release?.url ?: ""
-//                                Log.i(
-//                                    "Download", "MainActivity: downloadUrl ${it.release?.url ?: ""}"
-//                                )
-//                            }) {
-//                            //强制升级版本小于当前版本
-//                            if ((it.incompatibleVersion ?: 0) < BuildConfig.VERSION_CODE) {
-//                                lifecycleScope.launch {
-//                                    saveInt(
-//                                        this@MainActivity,
-//                                        "versionCode",
-//                                        it.release?.versionCode ?: 0
-//                                    )
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
 
         initUpdate()
 
