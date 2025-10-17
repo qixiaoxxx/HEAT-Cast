@@ -3,18 +3,16 @@ package com.mcast.heat.ui
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.mcast.heat.BaseDataBindingActivity
@@ -73,14 +71,59 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         startSdk()
 
         //  获取并显示设备名称
-        val deviceName = getDeviceName(this)
-        binding.tvDeviceName.text = getString(R.string.Projection_TV, deviceName)
-        binding.tvMirroringName.text = deviceName
-        binding.tvSelectDeviceName.text = deviceName
+        binding.tvDeviceName.text =
+            getString(R.string.Projection_TV, WaxPlayService._config.nickName)
+        binding.tvMirroringName.text = WaxPlayService._config.nickName
+        binding.tvSelectDeviceName.text = WaxPlayService._config.nickName
 
         //  请求权限以获取 Wi-Fi 名称
         askForLocationPermission()
 
+//        var version_code = 0
+//        lifecycleScope.launch {
+//            version_code = getInt(this@MainActivity, "versionCode") ?: 0
+//        }
+
+        //判断最新版本是否大于当前版本 并且 强制升级版本大于等于当前版本 或 最新版本是否大于需要跳过的版本
+//        mainViewModel.updateInfo.observe(this) {
+//            val latestVersionCode = it.release?.versionCode ?: 0
+//            val isForcedUpdate = (it.incompatibleVersion ?: 0) >= BuildConfig.VERSION_CODE
+//            if (latestVersionCode > BuildConfig.VERSION_CODE && (isForcedUpdate || latestVersionCode > version_code)) {
+//                lifecycleScope.launch {
+//                    if (Download.isDownloading.not()) {
+//                        popupWindowManager.showUpDatePopUpWindow(
+//                            isForcedUpdate, it.release?.changeLog ?: "", {
+//                                checkAndRequestPermissions(this@MainActivity, it.release?.url ?: "")
+//                                downloadUrl = it.release?.url ?: ""
+//                                Log.i(
+//                                    "Download", "MainActivity: downloadUrl ${it.release?.url ?: ""}"
+//                                )
+//                            }) {
+//                            //强制升级版本小于当前版本
+//                            if ((it.incompatibleVersion ?: 0) < BuildConfig.VERSION_CODE) {
+//                                lifecycleScope.launch {
+//                                    saveInt(
+//                                        this@MainActivity,
+//                                        "versionCode",
+//                                        it.release?.versionCode ?: 0
+//                                    )
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+
+        initUpdate()
+
+        callback.isEnabled = true
+        onBackPressedDispatcher.addCallback(this, callback)
+
+    }
+
+
+    private fun initUpdate() {
         var version_code = 0
         lifecycleScope.launch {
             version_code = getInt(this@MainActivity, "versionCode") ?: 0
@@ -95,30 +138,26 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
                     if (Download.isDownloading.not()) {
                         popupWindowManager.showUpDatePopUpWindow(
                             isForcedUpdate, it.release?.changeLog ?: "", {
-                                checkAndRequestPermissions(this@MainActivity, it.release?.url ?: "")
-                                downloadUrl = it.release?.url ?: ""
-                                Log.i(
-                                    "Download", "MainActivity: downloadUrl ${it.release?.url ?: ""}"
-                                )
-                            }) {
-                            //强制升级版本小于当前版本
-                            if ((it.incompatibleVersion ?: 0) < BuildConfig.VERSION_CODE) {
-                                lifecycleScope.launch {
-                                    saveInt(
-                                        this@MainActivity,
-                                        "versionCode",
-                                        it.release?.versionCode ?: 0
-                                    )
+                                ensureInstallPermission(this@MainActivity) {
+                                    startDownload(it.release?.url ?: "")
+                                }
+                            }, {
+                                //强制升级版本小于当前版本
+                                if ((it.incompatibleVersion ?: 0) < BuildConfig.VERSION_CODE) {
+                                    lifecycleScope.launch {
+                                        saveInt(
+                                            this@MainActivity,
+                                            "versionCode",
+                                            it.release?.versionCode ?: 0
+                                        )
+                                    }
                                 }
                             }
-                        }
+                        )
                     }
                 }
             }
         }
-        callback.isEnabled = true
-        onBackPressedDispatcher.addCallback(this, callback)
-
     }
 
 
@@ -238,6 +277,8 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         Global.RES_drawable_switch_on = com.waxrain.airplaydmr_SDK.R.drawable.switch_on
 
         if (WaxPlayService._config == null) WaxPlayService._config = Config(this)
+        WaxPlayService._config.nickName = getDeviceName(this)
+        WaxPlayService._config.nickName_RMPF = 1
         if (Config.AIRMIRR_RESOLUTION != 0) WaxPlayService.amr = Config.AIRMIRR_RESOLUTION
         WaxPlayService.configScreenResolution(this)
         Config.HWS_ENABLED = 0
@@ -252,7 +293,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         mIntent.setAction("com.waxrain.airplaydmr.WaxPlayService")
         mIntent.setPackage(packageName)
         try {
-            if (Build.VERSION.SDK_INT >= 26 && getApplicationInfo().targetSdkVersion >= 26)
+            if (Build.VERSION.SDK_INT >= 26 && applicationInfo.targetSdkVersion >= 26)
                 startForegroundService(
                     mIntent
                 )
@@ -338,49 +379,17 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         }
     }
 
-    private fun checkAndRequestPermissions(context: Context, url: String) {
-        val permissions = arrayOf(
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        )
-        val listPermissionsNeeded = ArrayList<String>()
-        for (permission in permissions) {
-            if (ContextCompat.checkSelfPermission(
-                    context,
-                    permission
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                listPermissionsNeeded.add(permission)
+    private fun ensureInstallPermission(activity: Activity, onReady: () -> Unit) {
+        if (Build.VERSION.SDK_INT >= 26) {
+            val allowed = activity.packageManager.canRequestPackageInstalls()
+            if (!allowed) {
+                val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
+                    .setData(Uri.parse("package:${activity.packageName}"))
+                activity.startActivity(intent)
+                return
             }
         }
-        if (listPermissionsNeeded.isNotEmpty()) {
-            ActivityCompat.requestPermissions(
-                context as Activity,
-                listPermissionsNeeded.toTypedArray(),
-                100
-            )
-        } else {
-            // Permissions already granted, continue with installation
-            startDownload(url)
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 100) {
-            if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                // 权限已获取，继续下载
-                downloadUrl?.let {
-                    startDownload(it)
-                }
-            } else {
-                Log.e("Permissions", "Permissions not granted")
-            }
-        }
+        onReady()
     }
 
     override fun onDestroy() {

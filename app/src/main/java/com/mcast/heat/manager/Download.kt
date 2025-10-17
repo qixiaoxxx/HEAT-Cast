@@ -62,7 +62,6 @@ object Download {
                                 break
                             }
                             bytesRead += len
-                            Log.i(TAG, "bytesRead: $bytesRead")
                             if (hasIntervalTimeElapsed(
                                     nanoStartTime,
                                     nanoStopTime,
@@ -79,7 +78,6 @@ object Download {
                                             FileSize.getFileSize(size * 1_000_000_000L / (nanoStopTime - nanoStartTime)) + "/s"
                                     },
                                 )
-                                Log.i(TAG, "bytesRead: $bytesRead")
                                 tempDownloadSize = bytesRead
                                 nanoStartTime = nanoStopTime
                             }
