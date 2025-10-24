@@ -2,18 +2,21 @@ package com.mcast.heat.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Intent
-import android.net.Uri
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.mcast.heat.BaseDataBindingActivity
 import com.mcast.heat.BuildConfig
@@ -36,12 +39,13 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 
-
 @AndroidEntryPoint
 class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
-
     private val mainViewModel by viewModels<MainViewModel>()
+    private var isWifiHelperStarted = false
+    private lateinit var wifiHelper: WifiHelper
     private var backPressCount = 0
+    private var pendingDownloadUrl: String? = null
     private val popupWindowManager by lazy {
         PopWindowManager(this)
     }
@@ -52,7 +56,6 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
     }
 
     override fun getLayoutId(): Int = R.layout.activity_main
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,30 +85,35 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
 
         callback.isEnabled = true
         onBackPressedDispatcher.addCallback(this, callback)
-
     }
 
-
     private fun initUpdate() {
-        var version_code = 0
+        var versionCode = 0
         lifecycleScope.launch {
-            version_code = getInt(this@MainActivity, "versionCode") ?: 0
+            versionCode = getInt(this@MainActivity, "versionCode") ?: 0
         }
-
-        //判断最新版本是否大于当前版本 并且 强制升级版本大于等于当前版本 或 最新版本是否大于需要跳过的版本
         mainViewModel.updateInfo.observe(this) {
             val latestVersionCode = it.release?.versionCode ?: 0
             val isForcedUpdate = (it.incompatibleVersion ?: 0) >= BuildConfig.VERSION_CODE
-            if (latestVersionCode > BuildConfig.VERSION_CODE && (isForcedUpdate || latestVersionCode > version_code)) {
+            if (latestVersionCode > BuildConfig.VERSION_CODE && (isForcedUpdate || latestVersionCode > versionCode)) {
                 lifecycleScope.launch {
                     if (Download.isDownloading.not()) {
                         popupWindowManager.showUpDatePopUpWindow(
-                            isForcedUpdate, it.release?.changeLog ?: "", {
-                                ensureInstallPermission(this@MainActivity) {
-                                    startDownload(it.release?.url ?: "")
+                            isForcedUpdate,
+                            it.release?.changeLog ?: "",
+                            {
+                                val urlToDownload = it.release?.url
+                                if (urlToDownload.isNullOrEmpty()) {
+                                    Toast.makeText(
+                                        this@MainActivity,
+                                        "下载地址无效",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    return@showUpDatePopUpWindow
                                 }
-                            }, {
-                                //强制升级版本小于当前版本
+                                ensureInstallPermissionAndDownload(urlToDownload)
+                            },
+                            {
                                 if ((it.incompatibleVersion ?: 0) < BuildConfig.VERSION_CODE) {
                                     lifecycleScope.launch {
                                         saveInt(
@@ -122,7 +130,6 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
             }
         }
     }
-
 
     fun initSdk() {
 
@@ -256,42 +263,67 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         mIntent.setAction("com.waxrain.airplaydmr.WaxPlayService")
         mIntent.setPackage(packageName)
         try {
-            if (Build.VERSION.SDK_INT >= 26 && applicationInfo.targetSdkVersion >= 26)
-                startForegroundService(
-                    mIntent
-                )
+            if (Build.VERSION.SDK_INT >= 26 && applicationInfo.targetSdkVersion >= 26) startForegroundService(
+                mIntent
+            )
             else startService(mIntent)
-        } catch (ex: Exception) {
+        } catch (_: Exception) {
         }
-        Log.i("_ADJNI_", "DEMO onCreate()")
-        Toast.makeText(this, "CAST start", Toast.LENGTH_LONG)
-
+        Toast.makeText(this, "CAST start", Toast.LENGTH_LONG).show()
     }
 
-
+    @SuppressLint("SetTextI18n")
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
             if (isGranted) {
-                setWifiName()
+                startWifiHelper()
             } else {
-                // 权限被拒绝，向用户解释为什么你需要这个权限
-                Log.d("WifiInfo", "位置权限被拒绝，无法获取 Wi-Fi 名称")
+                binding.tvWifiName.text = "Permission Denied"
             }
         }
 
     fun askForLocationPermission() {
-        // 请求精确位置权限
         requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        wifiHelper = WifiHelper(this)
+        collectWifiNameUpdates()
+        checkAndRequestPermission()
     }
 
+    private fun checkAndRequestPermission() {
+        when {
+            ContextCompat.checkSelfPermission(
+                this, Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                startWifiHelper()
+            }
+
+            else -> {
+                requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+        }
+    }
+
+    private fun startWifiHelper() {
+        lifecycleScope.launch {
+            wifiHelper.startListeningWifiChanges()
+        }
+    }
+
+    private fun collectWifiNameUpdates() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                wifiHelper.wifiName.collect { wifiName ->
+                    binding.tvWifiName.text = wifiName ?: "Permission Denied"
+                }
+            }
+        }
+    }
 
     @SuppressLint("SetTextI18n")
     fun setWifiName() {
         val wifiHelper = WifiHelper(this)
         lifecycleScope.launch {
-            // 启动 Wi-Fi 变化监听
             wifiHelper.startListeningWifiChanges()
-            // 收集 Wi-Fi 名称变化并更新 UI
             wifiHelper.wifiName.collect { ssid ->
                 if (ssid != null) {
                     binding.tvWifiName.text = ssid
@@ -325,14 +357,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         lifecycleScope.launch {
             Download.downloadFile(url, this@MainActivity).collect {
                 popupWindowManager.upDateProgressPopUpWindow(
-                    it.progress,
-                    it.perSecondBytes,
-                    it.bytesRead,
-                    it.totalSize
-                )
-                Log.i(
-                    "Download",
-                    "MainActivity: progress ${it.progress} perSecondBytes ${it.perSecondBytes} bytesRead ${it.bytesRead} totalSize ${it.totalSize}"
+                    it.progress, it.perSecondBytes, it.bytesRead, it.totalSize
                 )
                 if (it.isDone) {
                     popupWindowManager.hideUpDateProgressPopUpWindow()
@@ -342,28 +367,58 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         }
     }
 
-    private fun ensureInstallPermission(activity: Activity, onReady: () -> Unit) {
-        if (Build.VERSION.SDK_INT >= 26) {
-            val allowed = activity.packageManager.canRequestPackageInstalls()
-            if (!allowed) {
-                val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
-                    .setData(Uri.parse("package:${activity.packageName}"))
-                activity.startActivity(intent)
-                return
+    private fun ensureInstallPermissionAndDownload(url: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val haveInstallPermission = packageManager.canRequestPackageInstalls()
+            if (haveInstallPermission) {
+                startDownload(url)
+            } else {
+                pendingDownloadUrl = url
+                val intent = Intent(
+                    Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                    "package:$packageName".toUri()
+                )
+                installPermissionLauncher.launch(intent)
+            }
+        } else {
+            startDownload(url)
+        }
+    }
+
+    private val installPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (packageManager.canRequestPackageInstalls()) {
+                    pendingDownloadUrl?.let { url ->
+                        startDownload(url)
+                        pendingDownloadUrl = null
+                    }
+                } else {
+                    Toast.makeText(this, "未授予安装权限，无法完成更新", Toast.LENGTH_SHORT).show()
+                }
             }
         }
-        onReady()
+
+    override fun onResume() {
+        super.onResume()
+        if (!isWifiHelperStarted &&
+            ActivityCompat.checkSelfPermission(
+                this, Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            setWifiName()
+            isWifiHelperStarted = true
+        }
     }
 
     override fun onDestroy() {
         if (!Global.serviceExiting) Global.serviceExiting = true
-        try { // java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState
+        try {
             this.onBackPressed()
             this.finish()
-        } catch (e: java.lang.Exception) {
+        } catch (_: java.lang.Exception) {
         }
         popupWindowManager.hideAllPopWindow()
         super.onDestroy()
     }
-
 }
