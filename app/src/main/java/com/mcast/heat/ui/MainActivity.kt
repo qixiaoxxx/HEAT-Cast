@@ -7,11 +7,10 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.view.KeyEvent
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
@@ -30,7 +29,7 @@ import com.mcast.heat.util.getAndroidId
 import com.mcast.heat.util.getDeviceName
 import com.mcast.heat.util.getInt
 import com.mcast.heat.util.installApk
-import com.mcast.heat.util.saveInt
+import com.mcast.heat.util.logFirebaseEvent
 import com.waxrain.airplaydmr.WaxPlayService
 import com.waxrain.droidsender.delegate.Global
 import com.waxrain.ui.WaxPlayer
@@ -42,18 +41,15 @@ import kotlin.system.exitProcess
 @AndroidEntryPoint
 class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
     private val mainViewModel by viewModels<MainViewModel>()
-    private var isWifiHelperStarted = false
-    private lateinit var wifiHelper: WifiHelper
-    private var backPressCount = 0
+    private val wifiHelper: WifiHelper by lazy {
+        WifiHelper(this)
+    }
+    private var lastBackPressedTime: Long = 0
     private var pendingDownloadUrl: String? = null
     private val popupWindowManager by lazy {
         PopWindowManager(this)
     }
-    private val callback = object : OnBackPressedCallback(false) {
-        override fun handleOnBackPressed() {
-            handleBackPress()
-        }
-    }
+
 
     override fun getLayoutId(): Int = R.layout.activity_main
 
@@ -79,12 +75,12 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         binding.tvSelectDeviceName.text = WaxPlayService._config.nickName
 
         //  请求权限以获取 Wi-Fi 名称
-        askForLocationPermission()
+//        askForLocationPermission()
+        initWifiWithPermissionCheck()
+        collectWifiNameUpdates() // 单独设置一次监听即可
 
         initUpdate()
 
-        callback.isEnabled = true
-        onBackPressedDispatcher.addCallback(this, callback)
     }
 
     private fun initUpdate() {
@@ -98,33 +94,40 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
             if (latestVersionCode > BuildConfig.VERSION_CODE && (isForcedUpdate || latestVersionCode > versionCode)) {
                 lifecycleScope.launch {
                     if (Download.isDownloading.not()) {
-                        popupWindowManager.showUpDatePopUpWindow(
-                            isForcedUpdate,
-                            it.release?.changeLog ?: "",
-                            {
-                                val urlToDownload = it.release?.url
-                                if (urlToDownload.isNullOrEmpty()) {
-                                    Toast.makeText(
-                                        this@MainActivity,
-                                        "下载地址无效",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    return@showUpDatePopUpWindow
-                                }
-                                ensureInstallPermissionAndDownload(urlToDownload)
-                            },
-                            {
-                                if ((it.incompatibleVersion ?: 0) < BuildConfig.VERSION_CODE) {
-                                    lifecycleScope.launch {
-                                        saveInt(
-                                            this@MainActivity,
-                                            "versionCode",
-                                            it.release?.versionCode ?: 0
-                                        )
-                                    }
-                                }
-                            }
-                        )
+
+                        val urlToDownload = it.release?.url
+                        if (urlToDownload.isNullOrEmpty()) {
+                            return@launch
+                        }
+                        ensureInstallPermissionAndDownload(urlToDownload)
+
+//                        popupWindowManager.showUpDatePopUpWindow(
+//                            isForcedUpdate,
+//                            it.release?.changeLog ?: "",
+//                            {
+//                                val urlToDownload = it.release?.url
+//                                if (urlToDownload.isNullOrEmpty()) {
+//                                    Toast.makeText(
+//                                        this@MainActivity,
+//                                        "下载地址无效",
+//                                        Toast.LENGTH_SHORT
+//                                    ).show()
+//                                    return@showUpDatePopUpWindow
+//                                }
+//                                ensureInstallPermissionAndDownload(urlToDownload)
+//                            },
+//                            {
+//                                if ((it.incompatibleVersion ?: 0) < BuildConfig.VERSION_CODE) {
+//                                    lifecycleScope.launch {
+//                                        saveInt(
+//                                            this@MainActivity,
+//                                            "versionCode",
+//                                            it.release?.versionCode ?: 0
+//                                        )
+//                                    }
+//                                }
+//                            }
+//                        )
                     }
                 }
             }
@@ -269,25 +272,62 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
             else startService(mIntent)
         } catch (_: Exception) {
         }
-        Toast.makeText(this, "CAST start", Toast.LENGTH_LONG).show()
+        logFirebaseEvent(this, "CAST start", "startSdk")
+//        Toast.makeText(this, "CAST start", Toast.LENGTH_LONG).show()
     }
 
     @SuppressLint("SetTextI18n")
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
             if (isGranted) {
-                startWifiHelper()
+                // 权限被授予后，开始监听Wi-Fi变化
+                startWifiListener()
             } else {
-                binding.tvWifiName.text = "Permission Denied"
+                binding.tvWifiName.text = "无法获取Wi-Fi，需要位置权限"
+                Toast.makeText(this, "未授予位置权限，无法获取Wi-Fi名称", Toast.LENGTH_SHORT).show()
             }
         }
 
-    fun askForLocationPermission() {
-        requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-        wifiHelper = WifiHelper(this)
-        collectWifiNameUpdates()
-        checkAndRequestPermission()
+    // 4. 创建一个清晰的入口方法
+    private fun initWifiWithPermissionCheck() {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            // 已有权限，直接开始监听
+            startWifiListener()
+        } else {
+            // 没有权限，发起请求
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
     }
+
+    // 5. 启动监听
+    private fun startWifiListener() {
+        lifecycleScope.launch {
+            wifiHelper.startListeningWifiChanges()
+        }
+    }
+
+    // 6. 设置UI更新的收集器
+    private fun collectWifiNameUpdates() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                wifiHelper.wifiName.collect { wifiName ->
+                    binding.tvWifiName.text = wifiName ?: "Wi-Fi未连接"
+                }
+            }
+        }
+    }
+
+
+//    fun askForLocationPermission() {
+//        requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+//        wifiHelper = WifiHelper(this)
+//        collectWifiNameUpdates()
+//        checkAndRequestPermission()
+//    }
 
     private fun checkAndRequestPermission() {
         when {
@@ -309,15 +349,15 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         }
     }
 
-    private fun collectWifiNameUpdates() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                wifiHelper.wifiName.collect { wifiName ->
-                    binding.tvWifiName.text = wifiName ?: "Permission Denied"
-                }
-            }
-        }
-    }
+//    private fun collectWifiNameUpdates() {
+//        lifecycleScope.launch {
+//            repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                wifiHelper.wifiName.collect { wifiName ->
+//                    binding.tvWifiName.text = wifiName ?: "Permission Denied"
+//                }
+//            }
+//        }
+//    }
 
     @SuppressLint("SetTextI18n")
     fun setWifiName() {
@@ -334,36 +374,24 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         }
     }
 
-    private fun handleBackPress() {
-        backPressCount++
-        if (backPressCount >= 2) {
-            backPressCount = 0
-            popupWindowManager.showExitPopUpWindow {
-                lifecycleScope.launch {
-                    finishAffinity()
-                    exitProcess(0)
-                }
-            }
-        }
-    }
-
     /**
      * 下载安装
      */
     private fun startDownload(url: String) {
-        popupWindowManager.showUpDateProgressPopUpWindow(
-            0, "0.0K/s", "0.0M", "0.0M"
-        )
+//        popupWindowManager.showUpDateProgressPopUpWindow(
+//            0, "0.0K/s", "0.0M", "0.0M"
+//        )
         lifecycleScope.launch {
             Download.downloadFile(url, this@MainActivity).collect {
-                popupWindowManager.upDateProgressPopUpWindow(
-                    it.progress, it.perSecondBytes, it.bytesRead, it.totalSize
-                )
+//                popupWindowManager.upDateProgressPopUpWindow(
+//                    it.progress, it.perSecondBytes, it.bytesRead, it.totalSize
+//                )
                 if (it.isDone) {
-                    popupWindowManager.hideUpDateProgressPopUpWindow()
+//                    popupWindowManager.hideUpDateProgressPopUpWindow()
                     installApk(it.filePath)
                 }
             }
+            logFirebaseEvent(this@MainActivity, "Download", "startDownload")
         }
     }
 
@@ -394,22 +422,30 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
                         pendingDownloadUrl = null
                     }
                 } else {
-                    Toast.makeText(this, "未授予安装权限，无法完成更新", Toast.LENGTH_SHORT).show()
+                    logFirebaseEvent(this, "Download Permissions", "未授予安装权限，无法完成更新")
+//                    Toast.makeText(this, "未授予安装权限，无法完成更新", Toast.LENGTH_SHORT).show()
                 }
             }
         }
 
-    override fun onResume() {
-        super.onResume()
-        if (!isWifiHelperStarted &&
-            ActivityCompat.checkSelfPermission(
-                this, Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            setWifiName()
-            isWifiHelperStarted = true
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - lastBackPressedTime < 2000) {
+                popupWindowManager.showExitPopUpWindow {
+                    lifecycleScope.launch {
+                        finishAffinity()
+                        exitProcess(0)
+                    }
+                }
+            } else {
+                lastBackPressedTime = currentTime
+            }
+            return true
         }
+        return super.onKeyDown(keyCode, event)
     }
+
 
     override fun onDestroy() {
         if (!Global.serviceExiting) Global.serviceExiting = true

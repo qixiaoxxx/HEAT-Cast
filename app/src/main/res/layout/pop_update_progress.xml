@@ -25,7 +25,8 @@
             app:layout_constraintBottom_toBottomOf="@id/cl_bg"
             app:layout_constraintStart_toStartOf="@id/cl_bg"
             app:layout_constraintTop_toTopOf="@id/cl_bg"
-            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.RoundedSquare.Update" />
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.RoundedSquare.Update"
+            app:strokeColor="@null" />
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/progress_bar"

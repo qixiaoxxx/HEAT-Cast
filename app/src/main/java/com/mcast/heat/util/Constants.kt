@@ -5,9 +5,11 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import androidx.core.content.FileProvider
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.waxrain.airplaydmr.WaxPlayService
 import java.io.File
 import java.net.NetworkInterface
@@ -35,8 +37,7 @@ fun getDeviceName(context: Context): String {
 
             return baseName
         }
-    } catch (e: Exception) {
-        Log.e("DeviceInfo", "从 SDK 获取名称失败", e)
+    } catch (_: Exception) {
     }
     return Build.MANUFACTURER
 }
@@ -81,7 +82,8 @@ fun getAndroidId(context: Context): String {
 fun Context.installApk(apkPath: String) {
     val apkFile = File(apkPath)
     if (!apkFile.exists()) {
-        Log.e("InstallApk", "APK file does not exist: $apkPath")
+        logFirebaseEvent(this, "installApk", "APK file does not exist: $apkPath")
+//        Log.e("InstallApk", "APK file does not exist: $apkPath")
         return
     }
 
@@ -104,8 +106,10 @@ fun Context.installApk(apkPath: String) {
     try {
         startActivity(intent)
     } catch (e: Exception) {
-        Log.e("InstallApk", "Error installing APK", e)
+        logFirebaseEvent(this, "installApk", "Error installing APK: $e")
+//        Log.e("InstallApk", "Error installing APK", e)
     }
+    logFirebaseEvent(this, "installApk", "installApk")
 }
 
 
@@ -120,7 +124,7 @@ fun getDeviceId(context: Context): String {
 
 
 //获取设备网络名称
-fun getDeviceName(): String {
+fun getManufactureModel(): String {
     val manufacturer = Build.MANUFACTURER
     val model = Build.MODEL
     return if (model.startsWith(manufacturer)) {
@@ -128,5 +132,19 @@ fun getDeviceName(): String {
     } else {
         manufacturer.capitalize(Locale.getDefault()) + " " + model
     }
+}
+
+/**
+ * Firebase 上报通用事件
+ */
+fun logFirebaseEvent(context: Context, eventName: String, eventContent: String) {
+    val bundle = Bundle().apply {
+        putString("android_id", getAndroidId(context))
+        putString("device_id", getDeviceId(context))
+        putString("Projection_TV", getDeviceName(context))
+        putString("Manufacturer_Model", getManufactureModel())
+        putString(FirebaseAnalytics.Param.METHOD, eventContent)
+    }
+    FirebaseAnalytics.getInstance(context).logEvent(eventName, bundle)
 }
 

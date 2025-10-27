@@ -25,7 +25,8 @@
         android:src="@drawable/tiffany_1024"
         app:layout_constraintStart_toStartOf="@id/v_exit_bg"
         app:layout_constraintTop_toTopOf="@id/v_exit_bg"
-        app:shapeAppearanceOverlay="@style/ShapeAppearance.App.RoundedSquare" />
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.App.RoundedSquare"
+        app:strokeColor="@null" />
 
     <TextView
         android:layout_width="wrap_content"
