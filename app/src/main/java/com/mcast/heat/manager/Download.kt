@@ -62,6 +62,7 @@ object Download {
                                 break
                             }
                             bytesRead += len
+                            Log.i(TAG, "bytesRead: $bytesRead")
                             if (hasIntervalTimeElapsed(
                                     nanoStartTime,
                                     nanoStopTime,

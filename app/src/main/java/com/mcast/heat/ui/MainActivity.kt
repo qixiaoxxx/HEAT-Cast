@@ -250,8 +250,11 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         Global.RES_drawable_switch_on = com.waxrain.airplaydmr_SDK.R.drawable.switch_on
 
         if (WaxPlayService._config == null) WaxPlayService._config = Config(this)
+
+        //自定义设备连接名称
         WaxPlayService._config.nickName = getDeviceName(this)
         WaxPlayService._config.nickName_RMPF = 1
+
         if (Config.AIRMIRR_RESOLUTION != 0) WaxPlayService.amr = Config.AIRMIRR_RESOLUTION
         WaxPlayService.configScreenResolution(this)
         Config.HWS_ENABLED = 0
@@ -315,7 +318,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 wifiHelper.wifiName.collect { wifiName ->
-                    binding.tvWifiName.text = wifiName ?: "Wi-Fi未连接"
+                    binding.tvWifiName.text = wifiName ?: "Wi-Fi Disconnected"
                 }
             }
         }
@@ -387,7 +390,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
 //                    it.progress, it.perSecondBytes, it.bytesRead, it.totalSize
 //                )
                 if (it.isDone) {
-//                    popupWindowManager.hideUpDateProgressPopUpWindow()
+                    popupWindowManager.hideUpDateProgressPopUpWindow()
                     installApk(it.filePath)
                 }
             }
