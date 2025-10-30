@@ -6,9 +6,10 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.provider.Settings
+import android.util.Log
 import android.view.KeyEvent
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
@@ -23,19 +24,23 @@ import com.mcast.heat.R
 import com.mcast.heat.data.config.HeaderConfig
 import com.mcast.heat.databinding.ActivityMainBinding
 import com.mcast.heat.manager.Download
+import com.mcast.heat.manager.Progress
 import com.mcast.heat.ui.popwindow.PopWindowManager
+import com.mcast.heat.util.UpdateUtils
 import com.mcast.heat.util.WifiHelper
+import com.mcast.heat.util.cleanupOldApks
 import com.mcast.heat.util.getAndroidId
 import com.mcast.heat.util.getDeviceName
 import com.mcast.heat.util.getInt
+import com.mcast.heat.util.getManufactureModel
 import com.mcast.heat.util.installApk
-import com.mcast.heat.util.logFirebaseEvent
 import com.waxrain.airplaydmr.WaxPlayService
 import com.waxrain.droidsender.delegate.Global
 import com.waxrain.ui.WaxPlayer
 import com.waxrain.utils.Config
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.io.File
 import kotlin.system.exitProcess
 
 @AndroidEntryPoint
@@ -45,95 +50,209 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         WifiHelper(this)
     }
     private var lastBackPressedTime: Long = 0
-    private var pendingDownloadUrl: String? = null
     private val popupWindowManager by lazy {
         PopWindowManager(this)
     }
 
+    // 用于请求“精确位置”权限的 Launcher
+    private val requestLocationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                startWifiListener()
+            } else {
+                binding.tvWifiName.text = "No location permission"
+            }
+            checkAndInstallApkIfNeeded()
+        }
+
+
+    // 用于从“管理未知应用来源”设置页返回后的 Launcher
+    private val installPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (packageManager.canRequestPackageInstalls()) {
+                    requestRemainingPermissions()
+                } else {
+                    requestRemainingPermissions()
+                }
+            }
+        }
 
     override fun getLayoutId(): Int = R.layout.activity_main
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // 确保在新版本首次启动时，旧的安装包被删除
+        cleanupOldApks(this)
 
-        // firebase 事件上报
-        val bundle = Bundle()
-        bundle.putString(FirebaseAnalytics.Param.ACHIEVEMENT_ID, getAndroidId(this@MainActivity))
-        FirebaseAnalytics.getInstance(this@MainActivity)
-            .logEvent(FirebaseAnalytics.Event.APP_OPEN, bundle)
+        // 使用新的统一入口方法来请求权限
+        requestRequiredPermissions()
 
         // 初始化请求头
         HeaderConfig.init(application)
 
+        // firebase 事件上报
+        val bundle = Bundle()
+        bundle.putString(FirebaseAnalytics.Param.ACHIEVEMENT_ID, getAndroidId(this@MainActivity))
+        bundle.putString(
+            "resolution",
+            "${HeaderConfig.header_width_pixels_value}*${HeaderConfig.header_height_pixels_value}"
+        )
+        bundle.putString("manufacture_model", getManufactureModel())
+        FirebaseAnalytics.getInstance(this@MainActivity)
+            .logEvent("manufacture_model", bundle)
         initSdk()
         startSdk()
 
         //  获取并显示设备名称
         binding.tvDeviceName.text =
-            getString(R.string.Projection_TV, WaxPlayService._config.nickName)
+            getString(R.string.Device_Name, WaxPlayService._config.nickName)
         binding.tvMirroringName.text = WaxPlayService._config.nickName
         binding.tvSelectDeviceName.text = WaxPlayService._config.nickName
 
-        //  请求权限以获取 Wi-Fi 名称
-//        askForLocationPermission()
-        initWifiWithPermissionCheck()
-        collectWifiNameUpdates() // 单独设置一次监听即可
+        // 设置版本号
+        binding.tvVersionName.text = getString(R.string.Version_Name, BuildConfig.VERSION_NAME)
 
+        collectWifiNameUpdates()
+
+        // 初始化检查新版本下载
         initUpdate()
 
     }
 
-    private fun initUpdate() {
-        var versionCode = 0
-        lifecycleScope.launch {
-            versionCode = getInt(this@MainActivity, "versionCode") ?: 0
+    /**
+     * 统一的权限请求入口，首先处理安装权限。
+     */
+    private fun requestRequiredPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (!packageManager.canRequestPackageInstalls()) {
+                val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+                    data = "package:$packageName".toUri()
+                }
+                installPermissionLauncher.launch(intent)
+                return
+            }
         }
-        mainViewModel.updateInfo.observe(this) {
-            val latestVersionCode = it.release?.versionCode ?: 0
-            val isForcedUpdate = (it.incompatibleVersion ?: 0) >= BuildConfig.VERSION_CODE
-            if (latestVersionCode > BuildConfig.VERSION_CODE && (isForcedUpdate || latestVersionCode > versionCode)) {
-                lifecycleScope.launch {
-                    if (Download.isDownloading.not()) {
+        requestRemainingPermissions()
+    }
 
-                        val urlToDownload = it.release?.url
-                        if (urlToDownload.isNullOrEmpty()) {
-                            return@launch
+    /**
+     * 请求剩余的权限（如位置权限），并执行依赖于这些权限的操作。
+     */
+    private fun requestRemainingPermissions() {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        } else {
+            startWifiListener()
+            checkAndInstallApkIfNeeded()
+        }
+    }
+
+    private fun checkAndInstallApkIfNeeded() {
+        val pendingApkPath = UpdateUtils.getPendingApkPath(this)
+        if (!pendingApkPath.isNullOrEmpty()) {
+            val apkFile = File(pendingApkPath)
+            if (apkFile.exists() && isApkFileValid(apkFile)) {
+                installApk(apkFile)
+            } else {
+                Log.e("Install", "APK file is invalid or does not exist. Deleting record.")
+                apkFile.delete()
+                UpdateUtils.setPendingApkPath(this, "")
+            }
+        }
+    }
+
+    private fun isApkFileValid(apkFile: File): Boolean {
+        if (!apkFile.exists() || apkFile.length() == 0L) {
+            return false
+        }
+        try {
+            val pm = packageManager
+            val pInfo = pm.getPackageArchiveInfo(apkFile.absolutePath, 0)
+            return pInfo != null
+        } catch (e: Exception) {
+            Log.e("ApkValidation", "Failed to parse APK file: ${apkFile.absolutePath}", e)
+            return false
+        }
+    }
+
+    /**
+     *  检查服务器版本，如果需要则在后台下载 APK。
+     */
+    private fun initUpdate() {
+        mainViewModel.updateInfo.observe(this) { updateInfo ->
+            val latestVersionCode = updateInfo.release?.versionCode ?: 0
+            val isForcedUpdate = (updateInfo.incompatibleVersion ?: 0) >= BuildConfig.VERSION_CODE
+
+            lifecycleScope.launch {
+                val ignoredVersionCode = getInt(this@MainActivity, "versionCode") ?: 0
+                if (latestVersionCode > BuildConfig.VERSION_CODE && (isForcedUpdate || latestVersionCode > ignoredVersionCode)) {
+                    if (!Download.isDownloading) {
+                        val urlToDownload = updateInfo.release?.url
+                        if (!urlToDownload.isNullOrEmpty()) {
+                            startBackgroundDownload(urlToDownload)
                         }
-                        ensureInstallPermissionAndDownload(urlToDownload)
-
-//                        popupWindowManager.showUpDatePopUpWindow(
-//                            isForcedUpdate,
-//                            it.release?.changeLog ?: "",
-//                            {
-//                                val urlToDownload = it.release?.url
-//                                if (urlToDownload.isNullOrEmpty()) {
-//                                    Toast.makeText(
-//                                        this@MainActivity,
-//                                        "下载地址无效",
-//                                        Toast.LENGTH_SHORT
-//                                    ).show()
-//                                    return@showUpDatePopUpWindow
-//                                }
-//                                ensureInstallPermissionAndDownload(urlToDownload)
-//                            },
-//                            {
-//                                if ((it.incompatibleVersion ?: 0) < BuildConfig.VERSION_CODE) {
-//                                    lifecycleScope.launch {
-//                                        saveInt(
-//                                            this@MainActivity,
-//                                            "versionCode",
-//                                            it.release?.versionCode ?: 0
-//                                        )
-//                                    }
-//                                }
-//                            }
-//                        )
                     }
                 }
             }
         }
     }
 
+    /**
+     * 在后台下载新的 APK 文件。
+     * 下载完成后，将路径保存到 SharedPreferences。
+     * (这个方法直接使用 Download.kt)
+     */
+    private fun startBackgroundDownload(url: String) {
+        lifecycleScope.launch {
+            val filename = url.substringAfterLast("/")
+            if (filename.isBlank()) {
+                Log.e("Download", "Could not determine filename from URL: $url")
+                return@launch
+            }
+
+            val targetApkFile = File(
+                applicationContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
+                filename
+            )
+
+            Log.d(
+                "DownloadSetup",
+                "Target APK location for download: ${targetApkFile.absolutePath}"
+            )
+
+            Download.downloadFile(url, this@MainActivity, targetApkFile)
+                .collect { progress: Progress ->
+                    if (progress.isDone) {
+                        if (progress.filePath.isNotEmpty()) {
+                            // 下载成功！保存路径
+                            UpdateUtils.setPendingApkPath(this@MainActivity, progress.filePath)
+                            Log.d("Download", "APK downloaded and path saved: ${progress.filePath}")
+                        } else {
+                            Log.e("Download", "Download finished but APK path is missing.")
+                        }
+                    } else if (progress.downloadError) {
+                        Log.e(
+                            "Download",
+                            "Failed to download new version. Retry needed: ${progress.needRetry}"
+                        )
+                    } else {
+                        Log.d(
+                            "Download",
+                            "Downloading... ${progress.progress}% (${progress.bytesRead} / ${progress.totalSize})"
+                        )
+                    }
+                    progress.recycle()
+                }
+        }
+    }
+
+
+    @SuppressLint("InvalidAnalyticsName")
     fun initSdk() {
 
         Global.RES_app_icon = R.drawable.tiffany_1024
@@ -252,7 +371,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         if (WaxPlayService._config == null) WaxPlayService._config = Config(this)
 
         //自定义设备连接名称
-        WaxPlayService._config.nickName = getDeviceName(this)
+        WaxPlayService._config.nickName = getDeviceName()
         WaxPlayService._config.nickName_RMPF = 1
 
         if (Config.AIRMIRR_RESOLUTION != 0) WaxPlayService.amr = Config.AIRMIRR_RESOLUTION
@@ -262,8 +381,14 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         WaxPlayService.settingActivityCls = MainActivity::class.java
         WaxPlayService.setting2ActivityCls = MainActivity::class.java
         WaxPlayService.playerActivityCls = WaxPlayer::class.java
+
+        val bundle = Bundle()
+        bundle.putString("projection_tv", getDeviceName())
+        FirebaseAnalytics.getInstance(this@MainActivity)
+            .logEvent("cast_init", bundle)
     }
 
+    @SuppressLint("InvalidAnalyticsName")
     fun startSdk() {
         val mIntent = Intent()
         mIntent.setAction("com.waxrain.airplaydmr.WaxPlayService")
@@ -275,161 +400,35 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
             else startService(mIntent)
         } catch (_: Exception) {
         }
-        logFirebaseEvent(this, "CAST start", "startSdk")
+//        logFirebaseEvent(this, "CAST start", "startSdk")
+        val bundle = Bundle()
+        bundle.putString("source", "startSdk")
+        FirebaseAnalytics.getInstance(this@MainActivity)
+            .logEvent("cast_start", bundle)
 //        Toast.makeText(this, "CAST start", Toast.LENGTH_LONG).show()
     }
 
-    @SuppressLint("SetTextI18n")
-    private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-            if (isGranted) {
-                // 权限被授予后，开始监听Wi-Fi变化
-                startWifiListener()
-            } else {
-                binding.tvWifiName.text = "无法获取Wi-Fi，需要位置权限"
-                Toast.makeText(this, "未授予位置权限，无法获取Wi-Fi名称", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-    // 4. 创建一个清晰的入口方法
-    private fun initWifiWithPermissionCheck() {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            // 已有权限，直接开始监听
-            startWifiListener()
-        } else {
-            // 没有权限，发起请求
-            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
-    }
-
-    // 5. 启动监听
     private fun startWifiListener() {
         lifecycleScope.launch {
             wifiHelper.startListeningWifiChanges()
         }
     }
 
-    // 6. 设置UI更新的收集器
+    @SuppressLint("InvalidAnalyticsName")
     private fun collectWifiNameUpdates() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 wifiHelper.wifiName.collect { wifiName ->
                     binding.tvWifiName.text = wifiName ?: "Wi-Fi Disconnected"
+
+                    val bundle = Bundle()
+                    bundle.putString("wifi_name", wifiName ?: "Wi-Fi Disconnected")
+                    FirebaseAnalytics.getInstance(this@MainActivity)
+                        .logEvent("wifi_name", bundle)
                 }
             }
         }
     }
-
-
-//    fun askForLocationPermission() {
-//        requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-//        wifiHelper = WifiHelper(this)
-//        collectWifiNameUpdates()
-//        checkAndRequestPermission()
-//    }
-
-    private fun checkAndRequestPermission() {
-        when {
-            ContextCompat.checkSelfPermission(
-                this, Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED -> {
-                startWifiHelper()
-            }
-
-            else -> {
-                requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-            }
-        }
-    }
-
-    private fun startWifiHelper() {
-        lifecycleScope.launch {
-            wifiHelper.startListeningWifiChanges()
-        }
-    }
-
-//    private fun collectWifiNameUpdates() {
-//        lifecycleScope.launch {
-//            repeatOnLifecycle(Lifecycle.State.STARTED) {
-//                wifiHelper.wifiName.collect { wifiName ->
-//                    binding.tvWifiName.text = wifiName ?: "Permission Denied"
-//                }
-//            }
-//        }
-//    }
-
-    @SuppressLint("SetTextI18n")
-    fun setWifiName() {
-        val wifiHelper = WifiHelper(this)
-        lifecycleScope.launch {
-            wifiHelper.startListeningWifiChanges()
-            wifiHelper.wifiName.collect { ssid ->
-                if (ssid != null) {
-                    binding.tvWifiName.text = ssid
-                } else {
-                    binding.tvWifiName.text = "Wi-Fi Disconnected"
-                }
-            }
-        }
-    }
-
-    /**
-     * 下载安装
-     */
-    private fun startDownload(url: String) {
-//        popupWindowManager.showUpDateProgressPopUpWindow(
-//            0, "0.0K/s", "0.0M", "0.0M"
-//        )
-        lifecycleScope.launch {
-            Download.downloadFile(url, this@MainActivity).collect {
-//                popupWindowManager.upDateProgressPopUpWindow(
-//                    it.progress, it.perSecondBytes, it.bytesRead, it.totalSize
-//                )
-                if (it.isDone) {
-                    popupWindowManager.hideUpDateProgressPopUpWindow()
-                    installApk(it.filePath)
-                }
-            }
-            logFirebaseEvent(this@MainActivity, "Download", "startDownload")
-        }
-    }
-
-    private fun ensureInstallPermissionAndDownload(url: String) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val haveInstallPermission = packageManager.canRequestPackageInstalls()
-            if (haveInstallPermission) {
-                startDownload(url)
-            } else {
-                pendingDownloadUrl = url
-                val intent = Intent(
-                    Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                    "package:$packageName".toUri()
-                )
-                installPermissionLauncher.launch(intent)
-            }
-        } else {
-            startDownload(url)
-        }
-    }
-
-    private val installPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                if (packageManager.canRequestPackageInstalls()) {
-                    pendingDownloadUrl?.let { url ->
-                        startDownload(url)
-                        pendingDownloadUrl = null
-                    }
-                } else {
-                    logFirebaseEvent(this, "Download Permissions", "未授予安装权限，无法完成更新")
-//                    Toast.makeText(this, "未授予安装权限，无法完成更新", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {

@@ -25,10 +25,16 @@ android {
         applicationId = "com.mcast.heat"
         minSdk = 24
         targetSdk = 36
-        versionCode = 102
-        versionName = "1.0.2"
+        versionCode = 110
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters.clear()
+            abiFilters.addAll(listOf("armeabi-v7a"))
+        }
+
     }
 
     signingConfigs {
@@ -41,6 +47,9 @@ android {
             enableV2Signing = true
             enableV3Signing = true
             enableV4Signing = true
+            isV1SigningEnabled = true // 启用 v1 签名 (JAR Signature)
+            isV1SigningEnabled = true // 启用 v2 签名 (Full APK Signature)
+
         }
     }
 
@@ -75,7 +84,7 @@ android {
     android.applicationVariants.all {
         outputs.all {
             if (this is com.android.build.gradle.internal.api.ApkVariantOutputImpl) {
-                outputFileName = "HeatCast-$baseName-$versionName-251027.apk"
+                outputFileName = "HeatCast-$baseName-$versionName-251030.apk"
             }
         }
     }

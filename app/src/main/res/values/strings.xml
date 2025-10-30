@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">HEAT Cast</string>
 
-    <string name="Projection_TV" translatable="false">Projection TV: %s</string>
+    <string name="Device_Name" translatable="false">DeviceName: %s</string>
 
     <string name="Confirm_to_exit_the_HeatCast_application_and_no_longer_screen_cast" tools:ignore="MissingTranslation">Confirm to exit the HeatCast application and no longer screen cast</string>
 
@@ -13,5 +13,6 @@
     <string name="Skip" translatable="false">Skip</string>
     <string name="Ignore_Updates" translatable="false">Ignore Updates</string>
     <string name="Install_Now" translatable="false">Install Now</string>
+    <string name="Version_Name" translatable="false">V: %s</string>
 
 </resources>

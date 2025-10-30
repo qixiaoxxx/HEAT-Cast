@@ -23,7 +23,7 @@ object Download {
 
     var isDownloading = false
 
-    fun downloadFile(url: String, context: Context) =
+    fun downloadFile(url: String, context: Context, destination: File) =
         callbackFlow {
             isDownloading = true
             try {
@@ -33,7 +33,7 @@ object Download {
                     filename
                 ).absolutePath
                 var tempDownloadSize = 0L
-                Log.i(TAG, "downloadFile: $filePath")
+                Log.i(TAG, "downloadFile to destination: $filePath") // 日志现在会打印正确的路径
                 val responseBody = downloadService.download(url)
                 Log.i(TAG, "responseBody: ${responseBody.contentLength()}")
 
@@ -41,6 +41,9 @@ object Download {
                     val contentLength = body.contentLength()
                     Log.i(TAG, "contentLength: $contentLength")
                     val input = body.byteStream()
+                    // 确保父目录存在
+                    destination.parentFile?.mkdirs()
+
                     BufferedOutputStream(FileOutputStream(filePath, false)).use { output ->
                         val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
                         var bytesRead = 0L

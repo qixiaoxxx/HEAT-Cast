@@ -5,11 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
+import android.os.Environment
 import android.provider.Settings
 import android.util.Log
 import androidx.core.content.FileProvider
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.waxrain.airplaydmr.WaxPlayService
 import java.io.File
 import java.net.NetworkInterface
@@ -21,7 +20,7 @@ import java.util.Locale
  * "HEATCast_" 固定 ，"xxxxxx" 是 MAC 地址的后六位。
  */
 @SuppressLint("MissingPermission")
-fun getDeviceName(context: Context): String {
+fun getDeviceName(): String {
     try {
         val baseName = "HEATCast_"
         val macSuffix = getMacAddressLast6Chars()
@@ -79,25 +78,20 @@ fun getAndroidId(context: Context): String {
 
 
 //安装apk
-fun Context.installApk(apkPath: String) {
-    val apkFile = File(apkPath)
-    if (!apkFile.exists()) {
-        logFirebaseEvent(this, "installApk", "APK file does not exist: $apkPath")
-//        Log.e("InstallApk", "APK file does not exist: $apkPath")
-        return
-    }
-
-    val fileProvider = "$packageName.fileProvider"
+fun Context.installApk(apkFile: File) {
+    val fileProviderAuthority = "$packageName.fileprovider"
     val intent = Intent(Intent.ACTION_VIEW)
     intent.addCategory(Intent.CATEGORY_DEFAULT)
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     val type = "application/vnd.android.package-archive"
 
     val uri: Uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        FileProvider.getUriForFile(this, fileProvider, apkFile).also {
+        // 对于 Android 7.0 及以上版本，使用 FileProvider
+        FileProvider.getUriForFile(this, fileProviderAuthority, apkFile).also {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
     } else {
+        // 对于旧版本，直接使用文件 Uri
         Uri.fromFile(apkFile)
     }
 
@@ -106,22 +100,9 @@ fun Context.installApk(apkPath: String) {
     try {
         startActivity(intent)
     } catch (e: Exception) {
-        logFirebaseEvent(this, "installApk", "Error installing APK: $e")
-//        Log.e("InstallApk", "Error installing APK", e)
+        Log.e("InstallApk", "启动安装程序时出错", e)
     }
-    logFirebaseEvent(this, "installApk", "installApk")
 }
-
-
-//获取设备DeviceId
-@SuppressLint("HardwareIds")
-fun getDeviceId(context: Context): String {
-    return Settings.Secure.getString(
-        context.contentResolver,
-        Settings.Secure.ANDROID_ID
-    )
-}
-
 
 //获取设备网络名称
 fun getManufactureModel(): String {
@@ -135,16 +116,35 @@ fun getManufactureModel(): String {
 }
 
 /**
- * Firebase 上报通用事件
+ * 删除指定下载目录中的所有 APK 文件。
+ * @param context 上下文对象，用于获取文件目录。
  */
-fun logFirebaseEvent(context: Context, eventName: String, eventContent: String) {
-    val bundle = Bundle().apply {
-        putString("android_id", getAndroidId(context))
-        putString("device_id", getDeviceId(context))
-        putString("Projection_TV", getDeviceName(context))
-        putString("Manufacturer_Model", getManufactureModel())
-        putString(FirebaseAnalytics.Param.METHOD, eventContent)
-    }
-    FirebaseAnalytics.getInstance(context).logEvent(eventName, bundle)
-}
+fun cleanupOldApks(context: Context) {
+    // 获取应用专用的下载目录，这是存放 APK 的推荐位置
+    val downloadDir =
+        context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+    if (downloadDir != null && downloadDir.exists() && downloadDir.isDirectory) {
+        // 列出目录中所有的 .apk 文件
+        val oldApks = downloadDir.listFiles { _, name -> name.lowercase().endsWith(".apk") }
 
+        if (oldApks.isNullOrEmpty()) {
+            Log.d("Cleanup", "没有找到需要清理的旧 APK 文件。")
+            return
+        }
+
+        // 遍历并删除每个 APK 文件
+        for (apkFile in oldApks) {
+            try {
+                if (apkFile.delete()) {
+                    Log.i("Cleanup", "成功删除旧的 APK 文件: ${apkFile.name}")
+                } else {
+                    Log.w("Cleanup", "删除旧的 APK 文件失败: ${apkFile.name}")
+                }
+            } catch (e: SecurityException) {
+                Log.e("Cleanup", "删除 APK 文件时出现安全异常: ${apkFile.name}", e)
+            }
+        }
+    } else {
+        Log.w("Cleanup", "下载目录不存在或无法访问。")
+    }
+}
