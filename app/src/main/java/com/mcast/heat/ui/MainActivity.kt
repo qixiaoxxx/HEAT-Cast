@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -34,6 +35,7 @@ import com.mcast.heat.util.getDeviceName
 import com.mcast.heat.util.getInt
 import com.mcast.heat.util.getManufactureModel
 import com.mcast.heat.util.installApk
+import com.mcast.heat.util.logFirebaseEvent
 import com.waxrain.airplaydmr.WaxPlayService
 import com.waxrain.droidsender.delegate.Global
 import com.waxrain.ui.WaxPlayer
@@ -71,11 +73,18 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 if (packageManager.canRequestPackageInstalls()) {
-                    requestRemainingPermissions()
+                    requestOverlayPermission() // 安装权限通过后，继续请求悬浮窗权限
                 } else {
-                    requestRemainingPermissions()
+                    requestOverlayPermission() // 即使用户未授予，也继续下一步流程
                 }
             }
+        }
+
+    // 用于从“显示在其他应用上层”设置页返回后的 Launcher
+    private val overlayPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            // 从设置页返回后，无论用户是否授权，都继续请求剩余的权限
+            requestRemainingPermissions()
         }
 
     override fun getLayoutId(): Int = R.layout.activity_main
@@ -92,15 +101,14 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         HeaderConfig.init(application)
 
         // firebase 事件上报
-        val bundle = Bundle()
-        bundle.putString(FirebaseAnalytics.Param.ACHIEVEMENT_ID, getAndroidId(this@MainActivity))
-        bundle.putString(
-            "resolution",
-            "${HeaderConfig.header_width_pixels_value}*${HeaderConfig.header_height_pixels_value}"
+        logFirebaseEvent(
+            this@MainActivity,
+            "manufacture_model",
+            FirebaseAnalytics.Param.ACHIEVEMENT_ID to getAndroidId(this@MainActivity),
+            "resolution" to "${HeaderConfig.header_width_pixels_value}*${HeaderConfig.header_height_pixels_value}",
+            "manufacture_model" to getManufactureModel()
         )
-        bundle.putString("manufacture_model", getManufactureModel())
-        FirebaseAnalytics.getInstance(this@MainActivity)
-            .logEvent("manufacture_model", bundle)
+
         initSdk()
         startSdk()
 
@@ -121,7 +129,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
     }
 
     /**
-     * 统一的权限请求入口，首先处理安装权限。
+     * 统一的权限请求入口，按顺序请求安装、悬浮窗和位置权限。
      */
     private fun requestRequiredPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -133,8 +141,34 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
                 return
             }
         }
+        // 如果不需要请求安装权限，则直接开始请求悬浮窗权限
+        requestOverlayPermission()
+    }
+
+    /**
+     * 请求“显示在其他应用上层”（悬浮窗）权限。
+     */
+    @SuppressLint("ObsoleteSdkInt")
+    private fun requestOverlayPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(this)) {
+                val intent = Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:$packageName")
+                )
+                try {
+                    overlayPermissionLauncher.launch(intent)
+                } catch (e: Exception) {
+                    Log.e("PermissionRequest", "Cannot find activity to handle ACTION_MANAGE_OVERLAY_PERMISSION", e)
+                    requestRemainingPermissions()
+                }
+                return
+            }
+        }
+        // 如果已授予或版本低于M，则继续请求剩余权限
         requestRemainingPermissions()
     }
+
 
     /**
      * 请求剩余的权限（如位置权限），并执行依赖于这些权限的操作。
@@ -374,6 +408,9 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         WaxPlayService._config.nickName = getDeviceName()
         WaxPlayService._config.nickName_RMPF = 1
 
+        // 设置屏幕方向 3为自动，1为横屏，0为竖屏
+//        WaxPlayService._config.landscapeMode = 3
+
         if (Config.AIRMIRR_RESOLUTION != 0) WaxPlayService.amr = Config.AIRMIRR_RESOLUTION
         WaxPlayService.configScreenResolution(this)
         Config.HWS_ENABLED = 0
@@ -381,11 +418,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         WaxPlayService.settingActivityCls = MainActivity::class.java
         WaxPlayService.setting2ActivityCls = MainActivity::class.java
         WaxPlayService.playerActivityCls = WaxPlayer::class.java
-
-        val bundle = Bundle()
-        bundle.putString("projection_tv", getDeviceName())
-        FirebaseAnalytics.getInstance(this@MainActivity)
-            .logEvent("cast_init", bundle)
+        logFirebaseEvent(this, "cast_init", "projection_tv" to getDeviceName())
     }
 
     @SuppressLint("InvalidAnalyticsName")
@@ -400,11 +433,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
             else startService(mIntent)
         } catch (_: Exception) {
         }
-//        logFirebaseEvent(this, "CAST start", "startSdk")
-        val bundle = Bundle()
-        bundle.putString("source", "startSdk")
-        FirebaseAnalytics.getInstance(this@MainActivity)
-            .logEvent("cast_start", bundle)
+        logFirebaseEvent(this, "cast_start", "source" to "startSdk")
 //        Toast.makeText(this, "CAST start", Toast.LENGTH_LONG).show()
     }
 
@@ -420,11 +449,11 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 wifiHelper.wifiName.collect { wifiName ->
                     binding.tvWifiName.text = wifiName ?: "Wi-Fi Disconnected"
-
-                    val bundle = Bundle()
-                    bundle.putString("wifi_name", wifiName ?: "Wi-Fi Disconnected")
-                    FirebaseAnalytics.getInstance(this@MainActivity)
-                        .logEvent("wifi_name", bundle)
+                    logFirebaseEvent(
+                        this@MainActivity,
+                        "wifi_name",
+                        "wifi_name" to (wifiName ?: "Wi-Fi Disconnected")
+                    )
                 }
             }
         }

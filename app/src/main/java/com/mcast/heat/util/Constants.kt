@@ -5,10 +5,12 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
 import android.util.Log
 import androidx.core.content.FileProvider
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.waxrain.airplaydmr.WaxPlayService
 import java.io.File
 import java.net.NetworkInterface
@@ -76,6 +78,19 @@ fun getAndroidId(context: Context): String {
     )
 }
 
+/**
+ * @param context 上下文对象，用于获取文件目录。
+ * @param eventName 要上报的事件名称 (使用 FirebaseAnalytics.Event.* 中的常量)。
+ * @param params 一个可变的参数列表，由键值对 (Pair<String, String>) 组成。
+ */
+
+fun logFirebaseEvent(context: Context, eventName: String, vararg params: Pair<String, String>) {
+    val bundle = Bundle()
+    for ((key, value) in params) {
+        bundle.putString(key, value)
+    }
+    FirebaseAnalytics.getInstance(context).logEvent(eventName, bundle)
+}
 
 //安装apk
 fun Context.installApk(apkFile: File) {
