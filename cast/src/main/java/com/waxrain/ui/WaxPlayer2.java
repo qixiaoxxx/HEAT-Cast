@@ -219,9 +219,9 @@ public class WaxPlayer2 extends Fragment implements OnFocusChangeListener, OnTou
     public LinearLayout ctrlSpeed = null;
     public ImageButton ctrlSpeedButton = null;
     private TextView ctrlSpeedText = null;
-    public static String playSpeedStr[] = {"0.5X", "1X", "1.5X", "2X", "3X"};
-    public static Float playSpeedVal[] = {0.5f, 1.0f, 1.5f, 2.0f, 3.0f};
-    public int playSpeedIndex = 1;
+    public static String playSpeedStr[] = {"0.25X", "0.5X", "0.75X", "1X"};
+    public static Float playSpeedVal[] = {0.25f, 0.5f, 0.75f, 1.0f};
+    public int playSpeedIndex = 3;
     private TextView durationTView = null;
     private TextView currentPTView = null;
     private WaxPlayerLoading dialogLoading = null;
@@ -725,7 +725,7 @@ public class WaxPlayer2 extends Fragment implements OnFocusChangeListener, OnTou
                                 } catch (Exception e) {
                                     whichPlayer = PLAYER_NONE; // Exit Play()/Seek()
                                 }
-                                playSpeedIndex = 1;
+                                playSpeedIndex = 3;
                                 waxHandler.sendEmptyMessage(MSG_UPDATE_PLAYSPEED);
                             }
                         }

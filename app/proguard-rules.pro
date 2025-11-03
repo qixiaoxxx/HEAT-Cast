@@ -205,6 +205,14 @@
 -dontwarn org.fourthline.**
 
 
+-keepattributes Signature
+-keep class com.google.gson.reflect.TypeToken { *; }
+-keep class * extends com.google.gson.reflect.TypeToken
+-keepattributes AnnotationDefault,RuntimeVisibleAnnotations
+-keepclassmembers class * {
+  @com.google.gson.annotations.SerializedName <fields>;
+}
+
 # Please add these rules to your existing keep rules in order to suppress warnings.
 # This is generated automatically by the Android Gradle plugin.
 -dontwarn com.waxrain.airplaydmr.WaxPlayerRegister
