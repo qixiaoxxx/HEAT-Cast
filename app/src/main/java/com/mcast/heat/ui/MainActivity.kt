@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -68,25 +67,16 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
             checkAndInstallApkIfNeeded()
         }
 
-
     // 用于从“管理未知应用来源”设置页返回后的 Launcher
     private val installPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 if (packageManager.canRequestPackageInstalls()) {
-                    requestOverlayPermission() // 安装权限通过后，继续请求悬浮窗权限
+                    requestRemainingPermissions()
                 } else {
-                    requestOverlayPermission() // 即使用户未授予，也继续下一步流程
+                    requestRemainingPermissions()
                 }
             }
-        }
-
-
-    // 用于从“显示在其他应用上层”设置页返回后的 Launcher
-    private val overlayPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            // 从设置页返回后，无论用户是否授权，都继续请求剩余的权限
-            requestRemainingPermissions()
         }
 
     override fun getLayoutId(): Int = com.mcast.heat.R.layout.activity_main
@@ -114,6 +104,10 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
 
         initSdk()
         startSdk()
+
+        // 权限请求会再次启动
+        requestRequiredPermissions()
+
         //  获取并显示设备名称
         binding.tvDeviceName.text =
             getString(com.mcast.heat.R.string.Device_Name, WaxPlayService._config.nickName)
@@ -264,7 +258,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
     }
 
     /**
-     * 统一的权限请求入口，按顺序请求安装、悬浮窗和位置权限。
+     * 统一的权限请求入口，首先处理安装权限。
      */
     private fun requestRequiredPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -276,35 +270,6 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
                 return
             }
         }
-        // 如果不需要请求安装权限，则直接开始请求悬浮窗权限
-        requestOverlayPermission()
-    }
-
-    /**
-     * 请求“显示在其他应用上层”（悬浮窗）权限。
-     */
-    @SuppressLint("ObsoleteSdkInt")
-    private fun requestOverlayPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!Settings.canDrawOverlays(this)) {
-                val intent = Intent(
-                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:$packageName")
-                )
-                try {
-                    overlayPermissionLauncher.launch(intent)
-                } catch (e: Exception) {
-                    Log.e(
-                        "PermissionRequest",
-                        "Cannot find activity to handle ACTION_MANAGE_OVERLAY_PERMISSION",
-                        e
-                    )
-                    requestRemainingPermissions()
-                }
-                return
-            }
-        }
-        // 如果已授予或版本低于M，则继续请求剩余权限
         requestRemainingPermissions()
     }
 
@@ -474,6 +439,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         } catch (_: java.lang.Exception) {
         }
         popupWindowManager.hideAllPopWindow()
+        logFirebaseEvent(this, "on_destroy", "on_destroy" to "on_destroy")
         super.onDestroy()
     }
 }
