@@ -1,5 +1,7 @@
 <resources>
 
+	<string name="app_name">Heat Cast</string>
+
 	<!-- waxplayservice -->
     <string name="waxplayservice_toast_bootcomplete_P2">&#160;应用已启动：</string>
 	<string name="waxplayservice_toast_stopcomplete_P2">&#160;应用已停止：</string>

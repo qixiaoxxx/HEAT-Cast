@@ -1,10 +1,10 @@
 package com.mcast.heat.di
 
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.mcast.heat.BuildConfig
 import com.mcast.heat.data.network.HeaderInterceptor
 import com.mcast.heat.data.network.HttpDns
 import com.mcast.heat.data.network.SSLSocketClient
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

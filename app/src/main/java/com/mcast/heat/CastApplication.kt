@@ -12,7 +12,6 @@ import javax.inject.Inject
 
 @HiltAndroidApp
 class CastApplication : SenderApplication() {
-
     @Inject
     lateinit var networkMonitor: NetworkMonitor
 

@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit
 
 object Download {
 
-    private val downloadService = DownloadService.create()
+    private val downloadService = DownloadService.Companion.create()
 
     var isDownloading = false
 

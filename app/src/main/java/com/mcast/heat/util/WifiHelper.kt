@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.Build
@@ -42,7 +43,7 @@ class WifiHelper(private val context: Context) {
 
         suspendCancellableCoroutine<Unit> { continuation ->
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                val networkRequest = android.net.NetworkRequest.Builder()
+                val networkRequest = NetworkRequest.Builder()
                     .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
                     .build()
 
