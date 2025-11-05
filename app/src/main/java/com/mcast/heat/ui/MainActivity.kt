@@ -10,7 +10,6 @@ import android.os.Environment
 import android.provider.Settings
 import android.util.Log
 import android.view.KeyEvent
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
@@ -104,9 +103,6 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
 
         initSdk()
         startSdk()
-
-        // 权限请求会再次启动
-        requestRequiredPermissions()
 
         //  获取并显示设备名称
         binding.tvDeviceName.text =
@@ -254,7 +250,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         } catch (ex: Exception) {
         }
         Log.i("_ADJNI_", "DEMO onCreate()")
-        Toast.makeText(this, "CAST start", Toast.LENGTH_LONG)
+//        Toast.makeText(this, "CAST start", Toast.LENGTH_LONG)
     }
 
     /**
@@ -401,11 +397,6 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 wifiHelper.wifiName.collect { wifiName ->
                     binding.tvWifiName.text = wifiName ?: "Wi-Fi Disconnected"
-                    logFirebaseEvent(
-                        this@MainActivity,
-                        "wifi_name",
-                        "wifi_name" to (wifiName ?: "Wi-Fi Disconnected")
-                    )
                 }
             }
         }

@@ -13,6 +13,6 @@
     <string name="Skip" translatable="false">Skip</string>
     <string name="Ignore_Updates" translatable="false">Ignore Updates</string>
     <string name="Install_Now" translatable="false">Install Now</string>
-    <string name="Version_Name" translatable="false">V: %s</string>
+    <string name="Version_Name" translatable="false">Ver %s</string>
 
 </resources>

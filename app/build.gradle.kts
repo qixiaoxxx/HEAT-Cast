@@ -25,8 +25,8 @@ android {
         applicationId = "com.mcast.heat"
         minSdk = 24
         targetSdk = 36
-        versionCode = 113
-        versionName = "1.1.3"
+        versionCode = 115
+        versionName = "1.1.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -84,7 +84,7 @@ android {
     android.applicationVariants.all {
         outputs.all {
             if (this is com.android.build.gradle.internal.api.ApkVariantOutputImpl) {
-                outputFileName = "HeatCast-$baseName-$versionName-251104.apk"
+                outputFileName = "HeatCast-$baseName-$versionName-251105.apk"
             }
         }
     }

@@ -11,6 +11,7 @@ import android.provider.Settings
 import android.util.Log
 import androidx.core.content.FileProvider
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.mcast.heat.BuildConfig
 import com.waxrain.airplaydmr.WaxPlayService
 import java.io.File
 import java.net.NetworkInterface
@@ -94,7 +95,7 @@ fun logFirebaseEvent(context: Context, eventName: String, vararg params: Pair<St
 
 //安装apk
 fun Context.installApk(apkFile: File) {
-    val fileProviderAuthority = "$packageName.fileprovider"
+    val fileProviderAuthority = "$packageName.fileProvider"
     val intent = Intent(Intent.ACTION_VIEW)
     intent.addCategory(Intent.CATEGORY_DEFAULT)
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -135,31 +136,37 @@ fun getManufactureModel(): String {
  * @param context 上下文对象，用于获取文件目录。
  */
 fun cleanupOldApks(context: Context) {
-    // 获取应用专用的下载目录，这是存放 APK 的推荐位置
-    val downloadDir =
-        context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
-    if (downloadDir != null && downloadDir.exists() && downloadDir.isDirectory) {
-        // 列出目录中所有的 .apk 文件
-        val oldApks = downloadDir.listFiles { _, name -> name.lowercase().endsWith(".apk") }
+    val prefs = context.getSharedPreferences("AppUpdatePrefs", Context.MODE_PRIVATE)
+    val lastRunVersionCode = prefs.getInt("last_run_version_code", 0)
+    val currentVersionCode = BuildConfig.VERSION_CODE
 
-        if (oldApks.isNullOrEmpty()) {
-            Log.d("Cleanup", "没有找到需要清理的旧 APK 文件。")
-            return
-        }
+    // 只有当 当前版本号 > 上次记录的版本号时，才认为是升级后的首次启动
+    if (currentVersionCode > lastRunVersionCode) {
+        Log.i(
+            "Cleanup",
+            "App updated from version $lastRunVersionCode to $currentVersionCode. Cleaning up old APKs."
+        )
 
-        // 遍历并删除每个 APK 文件
-        for (apkFile in oldApks) {
-            try {
-                if (apkFile.delete()) {
-                    Log.i("Cleanup", "成功删除旧的 APK 文件: ${apkFile.name}")
-                } else {
-                    Log.w("Cleanup", "删除旧的 APK 文件失败: ${apkFile.name}")
+        // 在这里执行你原来的删除逻辑
+        try {
+            val downloadDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+            downloadDir?.listFiles { file ->
+                file.name.endsWith(".apk", ignoreCase = true)
+            }?.forEach { apkFile ->
+                if (apkFile.exists()) {
+                    apkFile.delete()
+                    Log.i("Cleanup", "Deleted old APK: ${apkFile.name}")
                 }
-            } catch (e: SecurityException) {
-                Log.e("Cleanup", "删除 APK 文件时出现安全异常: ${apkFile.name}", e)
             }
+        } catch (e: Exception) {
+            Log.e("Cleanup", "Error cleaning up APKs", e)
         }
+
+
+        // 完成清理后，立即更新 SharedPreferences 中的版本号
+        prefs.edit().putInt("last_run_version_code", currentVersionCode).apply()
     } else {
-        Log.w("Cleanup", "下载目录不存在或无法访问。")
+        // 如果不是升级，则不执行任何操作
+        Log.i("Cleanup", "Not a new version launch. Skipping APK cleanup.")
     }
 }
