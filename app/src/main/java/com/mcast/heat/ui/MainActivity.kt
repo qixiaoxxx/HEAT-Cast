@@ -2,7 +2,10 @@ package com.mcast.heat.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -78,6 +81,34 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
             }
         }
 
+    // 定义一个广播接收器
+    private val castStateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when (intent?.action) {
+                WaxPlayer.ACTION_CAST_START -> {
+//                    Log.d("MainActivity", "接收到投屏开始的广播")
+                    // 上报投屏开始事件
+                    logFirebaseEvent(
+                        this@MainActivity,
+                        "cast_start", // 事件名称
+                        "start_time" to System.currentTimeMillis().toString()
+                    )
+                }
+
+                WaxPlayer.ACTION_CAST_STOP -> {
+//                    Log.d("MainActivity", "接收到投屏结束的广播")
+                    // 上报投屏结束事件
+                    logFirebaseEvent(
+                        this@MainActivity,
+                        "cast_stop", // 事件名称
+                        "stop_time" to System.currentTimeMillis().toString()
+                    )
+                }
+            }
+        }
+    }
+
+
     override fun getLayoutId(): Int = com.mcast.heat.R.layout.activity_main
 
 
@@ -103,6 +134,9 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
 
         initSdk()
         startSdk()
+
+        // 注册广播接收器
+        registerCastReceiver()
 
         //  获取并显示设备名称
         binding.tvDeviceName.text =
@@ -421,6 +455,15 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         return super.onKeyDown(keyCode, event)
     }
 
+    // 注册广播接收器的方法
+    private fun registerCastReceiver() {
+        val intentFilter = IntentFilter().apply {
+            addAction(WaxPlayer.ACTION_CAST_START)
+            addAction(WaxPlayer.ACTION_CAST_STOP)
+        }
+        registerReceiver(castStateReceiver, intentFilter)
+    }
+
 
     override fun onDestroy() {
         if (!Global.serviceExiting) Global.serviceExiting = true
@@ -430,6 +473,8 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         } catch (_: java.lang.Exception) {
         }
         popupWindowManager.hideAllPopWindow()
+        // 注销广播接收器，防止内存泄漏
+        unregisterReceiver(castStateReceiver)
         logFirebaseEvent(this, "on_destroy", "on_destroy" to "on_destroy")
         super.onDestroy()
     }

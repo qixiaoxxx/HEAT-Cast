@@ -104,6 +104,10 @@ public class WaxPlayer extends FragmentActivity implements OnFocusChangeListener
     private static final String OSCA_DRM_PUBLIC_KEY = "请在这里填写版权保护公钥";
     private static boolean OSCA_DRM_CHECKED = false;
 
+    // 定义广播Action
+    public static final String ACTION_CAST_START = "com.waxrain.action.CAST_START";
+    public static final String ACTION_CAST_STOP = "com.waxrain.action.CAST_STOP";
+
     private void OSCA_AGC_DrmCheck() {
         OSCA_DRM_CHECKED = true;
     }
@@ -160,7 +164,7 @@ public class WaxPlayer extends FragmentActivity implements OnFocusChangeListener
 						MPlayerLock.lock();
 						int i = 0;
 						for (i = 0; i < MPlayerArray.length; i++) {
-							if (MPlayerArray[i] != null && 
+							if (MPlayerArray[i] != null &&
 								MPlayerArray[i].isExiting() == false ) {
 								if (MPlayerArray[i].mediaFormat != WaxPlayer2.FMT_PHOTO && MPlayerArray[i].mediaFormat != WaxPlayer2.FMT_UNKNOWN) {
 									if (MPlayerArray[i].playback_State != WaxPlayer2.STATE_STOPPED) // Music gotoBackground() playing
@@ -252,6 +256,11 @@ public class WaxPlayer extends FragmentActivity implements OnFocusChangeListener
                                     fragmentTransaction.add(MPlayerResID[index], MPlayerArray[index]);
                                     Log.i(LOG_TAG,"MActivity ADD MPlayer["+(index+1)+"] = "+MPlayerResID[index]+","+MPlayerArray[index]);
                                     fragmentTransaction.commit();
+
+                                    // 发送投屏开始广播
+                                    Intent startIntent = new Intent(ACTION_CAST_START);
+                                    sendBroadcast(startIntent);
+
                                 }
                             }
                         } catch (Exception e1) {
@@ -421,8 +430,13 @@ public class WaxPlayer extends FragmentActivity implements OnFocusChangeListener
             if (doFinish == true) {
                 if (WaxPlayService.ActivityFloatWindowMode == true)
                     doFinish = HideWholeLayoutWithAnimation(1000);
-                if (doFinish == true)
+                if (doFinish == true){
+                    // 发送投屏结束广播
+                    Intent stopIntent = new Intent(ACTION_CAST_STOP);
+                    sendBroadcast(stopIntent);
+
                     finish();
+                }
             }
             if (SDNativeView.jniLoaded == true)
                 SDNativeView.spq();
