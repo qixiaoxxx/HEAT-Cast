@@ -15,8 +15,13 @@ import com.mcast.heat.BuildConfig
 import com.waxrain.airplaydmr.WaxPlayService
 import java.io.File
 import java.net.NetworkInterface
+import java.text.SimpleDateFormat
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Collections
+import java.util.Date
 import java.util.Locale
+import androidx.core.content.edit
 
 /**
  * 获取并构建设备名称
@@ -162,11 +167,25 @@ fun cleanupOldApks(context: Context) {
             Log.e("Cleanup", "Error cleaning up APKs", e)
         }
 
-
         // 完成清理后，立即更新 SharedPreferences 中的版本号
-        prefs.edit().putInt("last_run_version_code", currentVersionCode).apply()
+        prefs.edit { putInt("last_run_version_code", currentVersionCode) }
     } else {
         // 如果不是升级，则不执行任何操作
         Log.i("Cleanup", "Not a new version launch. Skipping APK cleanup.")
+    }
+}
+
+/**
+ * 获取当前设备时区的格式化时间字符串
+ * @return 形如 "yyyy-MM-dd HH:mm:ss Z" 的时间字符串。
+ */
+fun getCurrentFormattedTime(): String {
+    val pattern = "yyyy-MM-dd HH:mm:ss Z"
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val formatter = DateTimeFormatter.ofPattern(pattern, Locale.ROOT)
+        ZonedDateTime.now().format(formatter)
+    } else {
+        val sdf = SimpleDateFormat(pattern, Locale.ROOT)
+        sdf.format(Date())
     }
 }

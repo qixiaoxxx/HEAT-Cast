@@ -32,6 +32,7 @@ import com.mcast.heat.util.UpdateUtils
 import com.mcast.heat.util.WifiHelper
 import com.mcast.heat.util.cleanupOldApks
 import com.mcast.heat.util.getAndroidId
+import com.mcast.heat.util.getCurrentFormattedTime
 import com.mcast.heat.util.getDeviceName
 import com.mcast.heat.util.getInt
 import com.mcast.heat.util.getManufactureModel
@@ -91,7 +92,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
                     logFirebaseEvent(
                         this@MainActivity,
                         "cast_start", // 事件名称
-                        "start_time" to System.currentTimeMillis().toString()
+                        "start_time" to getCurrentFormattedTime()
                     )
                 }
 
@@ -101,7 +102,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
                     logFirebaseEvent(
                         this@MainActivity,
                         "cast_stop", // 事件名称
-                        "stop_time" to System.currentTimeMillis().toString()
+                        "stop_time" to getCurrentFormattedTime()
                     )
                 }
             }
@@ -126,10 +127,11 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         // firebase 事件上报
         logFirebaseEvent(
             this@MainActivity,
-            "manufacture_model",
+            "Android_id",
             FirebaseAnalytics.Param.ACHIEVEMENT_ID to getAndroidId(this@MainActivity),
             "resolution" to "${HeaderConfig.header_width_pixels_value}*${HeaderConfig.header_height_pixels_value}",
-            "manufacture_model" to getManufactureModel()
+            "manufacture_model" to getManufactureModel(),
+            "start_app" to getCurrentFormattedTime(),
         )
 
         initSdk()
@@ -269,6 +271,12 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         WaxPlayService.settingActivityCls = MainActivity::class.java
         WaxPlayService.setting2ActivityCls = MainActivity::class.java
         WaxPlayService.playerActivityCls = WaxPlayer::class.java
+
+        logFirebaseEvent(
+            this@MainActivity,
+            "init_sdk", // 事件名称
+            "init_time" to getCurrentFormattedTime()
+        )
     }
 
     fun startSdk() {
@@ -284,6 +292,11 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         } catch (ex: Exception) {
         }
         Log.i("_ADJNI_", "DEMO onCreate()")
+        logFirebaseEvent(
+            this@MainActivity,
+            "start_sdk", // 事件名称
+            "start_time" to getCurrentFormattedTime()
+        )
 //        Toast.makeText(this, "CAST start", Toast.LENGTH_LONG)
     }
 
