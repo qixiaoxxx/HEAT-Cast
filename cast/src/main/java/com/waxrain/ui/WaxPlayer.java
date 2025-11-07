@@ -104,8 +104,11 @@ public class WaxPlayer extends FragmentActivity implements OnFocusChangeListener
     private static final String OSCA_DRM_PUBLIC_KEY = "请在这里填写版权保护公钥";
     private static boolean OSCA_DRM_CHECKED = false;
 
-    // 定义广播Action
-    public static final String ACTION_CAST_START = "com.waxrain.action.CAST_START";
+    // 用于发送开始投屏和URL的广播Action和Extra Key
+    public static final String ACTION_CAST_URL_RECEIVED = "com.waxrain.action.CAST_URL_RECEIVED";
+    public static final String EXTRA_CAST_URL = "cast_url";
+
+    // 用于发送结束投屏的广播Action
     public static final String ACTION_CAST_STOP = "com.waxrain.action.CAST_STOP";
 
     private void OSCA_AGC_DrmCheck() {
@@ -254,13 +257,13 @@ public class WaxPlayer extends FragmentActivity implements OnFocusChangeListener
                                     FragmentManager fgManager = getSupportFragmentManager();
                                     FragmentTransaction fragmentTransaction = fgManager.beginTransaction();
                                     fragmentTransaction.add(MPlayerResID[index], MPlayerArray[index]);
-                                    Log.i(LOG_TAG,"MActivity ADD MPlayer["+(index+1)+"] = "+MPlayerResID[index]+","+MPlayerArray[index]);
+                                    Log.i("MainActivity","MActivity ADD MPlayer["+(index+1)+"] = "+MPlayerResID[index]+","+MPlayerArray[index]);
                                     fragmentTransaction.commit();
 
-                                    // 发送投屏开始广播
-                                    Intent startIntent = new Intent(ACTION_CAST_START);
-                                    sendBroadcast(startIntent);
-
+                                    // 发送投屏开始广播 并发送播放url
+                                    Intent urlIntent = new Intent(ACTION_CAST_URL_RECEIVED);
+                                    urlIntent.putExtra(EXTRA_CAST_URL, MPlayerArray[index].url);
+                                    sendBroadcast(urlIntent);
                                 }
                             }
                         } catch (Exception e1) {
@@ -512,7 +515,7 @@ public class WaxPlayer extends FragmentActivity implements OnFocusChangeListener
 				if (hide_or_display == 0) {
 					// the below 2 lines are from RkVideoPlayer.apk in RK30@android 4.0.4
 					_window.getDecorView().setSystemUiVisibility(4);
-				} else if (hide_or_display == 1) { 
+				} else if (hide_or_display == 1) {
 					// the below 3 lines are from RkVideoPlayer.apk in RK30@android 4.1.1
 					_window.getDecorView().setSystemUiVisibility(8);
 				}*/
@@ -1981,8 +1984,8 @@ public class WaxPlayer extends FragmentActivity implements OnFocusChangeListener
                 for (i = 0; i < MPlayerArray.length; i++) {
                     if (MPlayerArray[i] != null &&
                             MPlayerArray[i].isExiting() == false && (
-                            MPlayerArray[i].mediaProto == (MPlayerArray[i].mediaProto&proto) || proto < 0) && (
-                            MPlayerArray[i].client_id.equals(clientId) || execAll != 0 ) ) {
+                            MPlayerArray[i].mediaProto == (MPlayerArray[i].mediaProto & proto) || proto < 0) && (
+                            MPlayerArray[i].client_id.equals(clientId) || execAll != 0)) {
                         if (MPlayerArray[i].is_Caching() == true)
                             n ++;
                         if (execAll == 0)

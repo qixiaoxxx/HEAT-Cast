@@ -30,6 +30,7 @@ import com.mcast.heat.manager.Progress
 import com.mcast.heat.ui.popwindow.PopWindowManager
 import com.mcast.heat.util.UpdateUtils
 import com.mcast.heat.util.WifiHelper
+import com.mcast.heat.util.calculateDuration
 import com.mcast.heat.util.cleanupOldApks
 import com.mcast.heat.util.getAndroidId
 import com.mcast.heat.util.getCurrentFormattedTime
@@ -55,6 +56,10 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         WifiHelper(this)
     }
     private var lastBackPressedTime: Long = 0
+
+    // 用于保存投屏开始时间
+    private var castStartTime: String? = null
+
     private val popupWindowManager by lazy {
         PopWindowManager(this)
     }
@@ -86,32 +91,40 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
     private val castStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
-                WaxPlayer.ACTION_CAST_START -> {
-//                    Log.d("MainActivity", "接收到投屏开始的广播")
-                    // 上报投屏开始事件
+                WaxPlayer.ACTION_CAST_URL_RECEIVED -> {
+                    castStartTime = getCurrentFormattedTime()
+                    val castUrl = intent.getStringExtra(WaxPlayer.EXTRA_CAST_URL) ?: "empty"
                     logFirebaseEvent(
                         this@MainActivity,
-                        "cast_start", // 事件名称
-                        "start_time" to getCurrentFormattedTime()
+                        "cast_start",
+                        "start_time" to castStartTime!!,
+                        "cast_url" to castUrl
                     )
+//                    Log.d("MainActivity", "接收到投屏开始的广播 start_time $castStartTime  cast_url $castUrl")
                 }
 
                 WaxPlayer.ACTION_CAST_STOP -> {
-//                    Log.d("MainActivity", "接收到投屏结束的广播")
-                    // 上报投屏结束事件
+                    val stopTime = getCurrentFormattedTime()
+                    val duration = if (castStartTime != null) {
+                        calculateDuration(castStartTime!!, stopTime)
+                    } else {
+                        "unknown"
+                    }
                     logFirebaseEvent(
                         this@MainActivity,
-                        "cast_stop", // 事件名称
-                        "stop_time" to getCurrentFormattedTime()
+                        "cast_stop",
+                        "start_time" to (castStartTime ?: "unknown"),
+                        "stop_time" to stopTime,
+                        "duration_seconds" to duration
                     )
+//                    Log.d("MainActivity", "接收到投屏结束的广播 start_time $castStartTime  stop_time $stopTime  duration_seconds $duration")
+                    castStartTime = null
                 }
             }
         }
     }
 
-
     override fun getLayoutId(): Int = com.mcast.heat.R.layout.activity_main
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -155,7 +168,6 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         // 初始化检查新版本下载
         initUpdate()
     }
-
 
     fun initSdk() {
 
@@ -346,7 +358,6 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         }
     }
 
-
     private fun isApkFileValid(apkFile: File): Boolean {
         if (!apkFile.exists() || apkFile.length() == 0L) {
             return false
@@ -471,7 +482,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
     // 注册广播接收器的方法
     private fun registerCastReceiver() {
         val intentFilter = IntentFilter().apply {
-            addAction(WaxPlayer.ACTION_CAST_START)
+            addAction(WaxPlayer.ACTION_CAST_URL_RECEIVED)
             addAction(WaxPlayer.ACTION_CAST_STOP)
         }
         registerReceiver(castStateReceiver, intentFilter)

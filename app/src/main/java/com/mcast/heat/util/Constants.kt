@@ -189,3 +189,45 @@ fun getCurrentFormattedTime(): String {
         sdf.format(Date())
     }
 }
+
+/**
+ * 计算两个带时区格式的时间字符串之间的秒数差，并格式化为易读的形式。
+ * @param startTimeString "yyyy-MM-dd HH:mm:ss Z" 格式的开始时间
+ * @param endTimeString "yyyy-MM-dd HH:mm:ss Z" 格式的结束时间
+ * @return 格式化后的时长字符串（如 45s, 2m23s, 1h30m48s），如果解析失败则返回 "error"。
+ */
+fun calculateDuration(startTimeString: String, endTimeString: String): String {
+    val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", Locale.ROOT)
+    return try {
+        val startDate = format.parse(startTimeString)
+        val endDate = format.parse(endTimeString)
+
+        if (startDate != null && endDate != null) {
+            val diffInMillis = endDate.time - startDate.time
+            if (diffInMillis < 0) return "0s"
+            val totalSeconds = diffInMillis / 1000
+            val hours = totalSeconds / 3600
+            val minutes = (totalSeconds % 3600) / 60
+            val seconds = totalSeconds % 60
+            val builder = StringBuilder()
+            if (hours > 0) {
+                builder.append(hours).append("h")
+            }
+            if (minutes > 0 || (hours > 0)) {
+                if (minutes > 0) {
+                    builder.append(minutes).append("m")
+                }
+            }
+            if (builder.isEmpty() || seconds > 0) {
+                builder.append(seconds).append("s")
+            } else if (totalSeconds == 0L) {
+                return "0s"
+            }
+            if (builder.isEmpty()) "0s" else builder.toString()
+        } else {
+            "parse_error"
+        }
+    } catch (_: Exception) {
+        "calc_error"
+    }
+}
