@@ -1,3 +1,7 @@
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlin.android)
@@ -25,8 +29,8 @@ android {
         applicationId = "com.mcast.heat"
         minSdk = 24
         targetSdk = 36
-        versionCode = 116
-        versionName = "1.1.6"
+        versionCode = 118
+        versionName = "1.1.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -84,7 +88,9 @@ android {
     android.applicationVariants.all {
         outputs.all {
             if (this is com.android.build.gradle.internal.api.ApkVariantOutputImpl) {
-                outputFileName = "HeatCast-$baseName-$versionName-251105.apk"
+                val date = Date()
+                val formattedDate = SimpleDateFormat("yyMMdd", Locale.getDefault()).format(date)
+                outputFileName = "HeatCast-$baseName-$versionName-${formattedDate}.apk"
             }
         }
     }

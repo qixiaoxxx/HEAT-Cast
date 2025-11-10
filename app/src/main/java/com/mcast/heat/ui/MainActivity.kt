@@ -20,7 +20,6 @@ import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.mcast.heat.BaseDataBindingActivity
 import com.mcast.heat.BuildConfig
 import com.mcast.heat.data.config.HeaderConfig
@@ -30,15 +29,11 @@ import com.mcast.heat.manager.Progress
 import com.mcast.heat.ui.popwindow.PopWindowManager
 import com.mcast.heat.util.UpdateUtils
 import com.mcast.heat.util.WifiHelper
-import com.mcast.heat.util.calculateDuration
 import com.mcast.heat.util.cleanupOldApks
-import com.mcast.heat.util.getAndroidId
 import com.mcast.heat.util.getCurrentFormattedTime
 import com.mcast.heat.util.getDeviceName
 import com.mcast.heat.util.getInt
-import com.mcast.heat.util.getManufactureModel
 import com.mcast.heat.util.installApk
-import com.mcast.heat.util.logFirebaseEvent
 import com.waxrain.airplaydmr.WaxPlayService
 import com.waxrain.airplaydmr_SDK.R
 import com.waxrain.droidsender.delegate.Global
@@ -92,33 +87,24 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
                 WaxPlayer.ACTION_CAST_URL_RECEIVED -> {
+                    // 仅记录开始时间，不进行任何上报
                     castStartTime = getCurrentFormattedTime()
-                    val castUrl = intent.getStringExtra(WaxPlayer.EXTRA_CAST_URL) ?: "empty"
-                    logFirebaseEvent(
-                        this@MainActivity,
-                        "cast_start",
-                        "start_time" to castStartTime!!,
-                        "cast_url" to castUrl
-                    )
-//                    Log.d("MainActivity", "接收到投屏开始的广播 start_time $castStartTime  cast_url $castUrl")
                 }
 
                 WaxPlayer.ACTION_CAST_STOP -> {
-                    val stopTime = getCurrentFormattedTime()
-                    val duration = if (castStartTime != null) {
-                        calculateDuration(castStartTime!!, stopTime)
-                    } else {
-                        "unknown"
+                    // 如果有开始时间，则计算时长并通知ViewModel更新聚合数据
+                    castStartTime?.let { startTime ->
+                        val stopTime = getCurrentFormattedTime()
+                        try {
+                            // 【修改点】直接将开始和结束时间传递给 ViewModel
+                            mainViewModel.recordCompletedCast(startTime, stopTime)
+                        } catch (e: Exception) {
+                            Log.e("MainActivity", "Error processing cast duration.", e)
+                        } finally {
+                            // 重置开始时间，为下一次投屏做准备
+                            castStartTime = null
+                        }
                     }
-                    logFirebaseEvent(
-                        this@MainActivity,
-                        "cast_stop",
-                        "start_time" to (castStartTime ?: "unknown"),
-                        "stop_time" to stopTime,
-                        "duration_seconds" to duration
-                    )
-//                    Log.d("MainActivity", "接收到投屏结束的广播 start_time $castStartTime  stop_time $stopTime  duration_seconds $duration")
-                    castStartTime = null
                 }
             }
         }
@@ -137,40 +123,22 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         // 初始化请求头
         HeaderConfig.init(application)
 
-        // firebase 事件上报
-        logFirebaseEvent(
-            this@MainActivity,
-            "Android_id",
-            FirebaseAnalytics.Param.ACHIEVEMENT_ID to getAndroidId(this@MainActivity),
-            "resolution" to "${HeaderConfig.header_width_pixels_value}*${HeaderConfig.header_height_pixels_value}",
-            "manufacture_model" to getManufactureModel(),
-            "start_app" to getCurrentFormattedTime(),
-        )
+        // firebase 事件上报 在App启动时通知 MainViewModel 处理首次上报
+        val resolution =
+            "${HeaderConfig.header_width_pixels_value}*${HeaderConfig.header_height_pixels_value}"
+        mainViewModel.onSessionStart(this, resolution)
 
         initSdk()
         startSdk()
-
+        initView()
         // 注册广播接收器
         registerCastReceiver()
-
-        //  获取并显示设备名称
-        binding.tvDeviceName.text =
-            getString(com.mcast.heat.R.string.Device_Name, WaxPlayService._config.nickName)
-        binding.tvMirroringName.text = WaxPlayService._config.nickName
-        binding.tvSelectDeviceName.text = WaxPlayService._config.nickName
-
-        // 设置版本号
-        binding.tvVersionName.text =
-            getString(com.mcast.heat.R.string.Version_Name, BuildConfig.VERSION_NAME)
-
-        collectWifiNameUpdates()
-
         // 初始化检查新版本下载
         initUpdate()
     }
 
     fun initSdk() {
-
+        mainViewModel.recordInitSdkTime()
         Global.RES_app_icon = com.mcast.heat.R.drawable.tiffany_1024
         Global.RES_service_notify_info = getString(R.string.service_notify_info)
         Global.RES_STRING_service_confliction = R.string.service_confliction
@@ -283,15 +251,10 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         WaxPlayService.settingActivityCls = MainActivity::class.java
         WaxPlayService.setting2ActivityCls = MainActivity::class.java
         WaxPlayService.playerActivityCls = WaxPlayer::class.java
-
-        logFirebaseEvent(
-            this@MainActivity,
-            "init_sdk", // 事件名称
-            "init_time" to getCurrentFormattedTime()
-        )
     }
 
     fun startSdk() {
+        mainViewModel.recordStartSdkTime()
         val mIntent = Intent()
         mIntent.action = "com.waxrain.airplaydmr.WaxPlayService"
         mIntent.setPackage(packageName)
@@ -304,17 +267,23 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         } catch (ex: Exception) {
         }
         Log.i("_ADJNI_", "DEMO onCreate()")
-        logFirebaseEvent(
-            this@MainActivity,
-            "start_sdk", // 事件名称
-            "start_time" to getCurrentFormattedTime()
-        )
 //        Toast.makeText(this, "CAST start", Toast.LENGTH_LONG)
     }
 
-    /**
-     * 统一的权限请求入口，首先处理安装权限。
-     */
+    fun initView() {
+        //  获取并显示设备名称
+        binding.tvDeviceName.text =
+            getString(com.mcast.heat.R.string.Device_Name, WaxPlayService._config.nickName)
+        binding.tvMirroringName.text = WaxPlayService._config.nickName
+        binding.tvSelectDeviceName.text = WaxPlayService._config.nickName
+        // 设置版本号
+        binding.tvVersionName.text =
+            getString(com.mcast.heat.R.string.Version_Name, BuildConfig.VERSION_NAME)
+        // 设置WI-FI名称
+        collectWifiNameUpdates()
+    }
+
+    // 统一的权限请求入口，首先处理安装权限
     private fun requestRequiredPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (!packageManager.canRequestPackageInstalls()) {
@@ -328,9 +297,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         requestRemainingPermissions()
     }
 
-    /**
-     * 请求剩余的权限（如位置权限），并执行依赖于这些权限的操作。
-     */
+    // 请求剩余的权限（如位置权限），并执行依赖于这些权限的操作
     private fun requestRemainingPermissions() {
         if (ContextCompat.checkSelfPermission(
                 this,
@@ -372,9 +339,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         }
     }
 
-    /**
-     *  检查服务器版本，如果需要则在后台下载 APK。
-     */
+    // 检查服务器版本，如果需要则在后台下载 APK
     private fun initUpdate() {
         mainViewModel.updateInfo.observe(this) { updateInfo ->
             val latestVersionCode = updateInfo.release?.versionCode ?: 0
@@ -397,7 +362,6 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
     /**
      * 在后台下载新的 APK 文件。
      * 下载完成后，将路径保存到 SharedPreferences。
-     * (这个方法直接使用 Download.kt)
      */
     private fun startBackgroundDownload(url: String) {
         lifecycleScope.launch {
@@ -481,25 +445,27 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
 
     // 注册广播接收器的方法
     private fun registerCastReceiver() {
-        val intentFilter = IntentFilter().apply {
-            addAction(WaxPlayer.ACTION_CAST_URL_RECEIVED)
-            addAction(WaxPlayer.ACTION_CAST_STOP)
-        }
-        registerReceiver(castStateReceiver, intentFilter)
+        val filter = IntentFilter()
+        filter.addAction(WaxPlayer.ACTION_CAST_URL_RECEIVED)
+        filter.addAction(WaxPlayer.ACTION_CAST_STOP)
+        registerReceiver(castStateReceiver, filter)
     }
 
 
     override fun onDestroy() {
         if (!Global.serviceExiting) Global.serviceExiting = true
-        try {
-            this.onBackPressed()
-            this.finish()
-        } catch (_: java.lang.Exception) {
+        // isFinishing确保这代表用户主动退出或系统回收，而不是屏幕旋转等配置更改
+        if (isFinishing) {
+            mainViewModel.onSessionStop(this)
         }
         popupWindowManager.hideAllPopWindow()
-        // 注销广播接收器，防止内存泄漏
-        unregisterReceiver(castStateReceiver)
-        logFirebaseEvent(this, "on_destroy", "on_destroy" to "on_destroy")
+        // 反注册广播接收器，防止内存泄漏
+        try {
+            unregisterReceiver(castStateReceiver)
+        } catch (e: Exception) {
+            // 如果接收器之前没有被成功注册，抛出异常，捕获并忽略
+            Log.w("MainActivity", "Error unregistering castStateReceiver: ${e.message}")
+        }
         super.onDestroy()
     }
 }

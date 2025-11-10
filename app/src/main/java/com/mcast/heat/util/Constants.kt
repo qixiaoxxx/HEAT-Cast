@@ -75,7 +75,7 @@ fun getMacAddressLast6Chars(): String? {
     return null
 }
 
-//获取设备AndroidId
+// 获取设备AndroidId
 @SuppressLint("HardwareIds")
 fun getAndroidId(context: Context): String {
     return Settings.Secure.getString(
@@ -191,43 +191,53 @@ fun getCurrentFormattedTime(): String {
 }
 
 /**
- * 计算两个带时区格式的时间字符串之间的秒数差，并格式化为易读的形式。
- * @param startTimeString "yyyy-MM-dd HH:mm:ss Z" 格式的开始时间
- * @param endTimeString "yyyy-MM-dd HH:mm:ss Z" 格式的结束时间
- * @return 格式化后的时长字符串（如 45s, 2m23s, 1h30m48s），如果解析失败则返回 "error"。
+ * 将总秒数格式化为易读的时长字符串。
+ * @param totalSeconds 总时长（秒）。
+ * @return 格式化后的时长字符串（如 45s, 2m23s, 1h30m48s）。
  */
-fun calculateDuration(startTimeString: String, endTimeString: String): String {
-    val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", Locale.ROOT)
-    return try {
+fun formatDurationFromSeconds(totalSeconds: Long): String {
+    if (totalSeconds < 0) return "0s"
+    if (totalSeconds == 0L) return "0s"
+
+    val hours = totalSeconds / 3600
+    val minutes = (totalSeconds % 3600) / 60
+    val seconds = totalSeconds % 60
+
+    val builder = StringBuilder()
+
+    if (hours > 0) {
+        builder.append(hours).append("h")
+    }
+
+    if (minutes > 0) {
+        builder.append(minutes).append("m")
+    }
+
+    // 如果总时长小于1分钟，或者秒数不为0，则添加秒
+    if (totalSeconds < 60 || seconds > 0) {
+        builder.append(seconds).append("s")
+    }
+
+    // 如果构建后为空（逻辑上不太可能，除非totalSeconds > 0但所有部分都为0），则返回0s
+    return if (builder.isEmpty()) "0s" else builder.toString()
+}
+
+/**
+ * 计算两个带时区格式的时间字符串之间的秒数差。
+ * @return 时长（秒），如果解析失败会抛出异常
+ */
+fun calculateDurationToLong(startTimeString: String, endTimeString: String): Long {
+    val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", java.util.Locale.ROOT)
+    try {
         val startDate = format.parse(startTimeString)
         val endDate = format.parse(endTimeString)
-
         if (startDate != null && endDate != null) {
             val diffInMillis = endDate.time - startDate.time
-            if (diffInMillis < 0) return "0s"
-            val totalSeconds = diffInMillis / 1000
-            val hours = totalSeconds / 3600
-            val minutes = (totalSeconds % 3600) / 60
-            val seconds = totalSeconds % 60
-            val builder = StringBuilder()
-            if (hours > 0) {
-                builder.append(hours).append("h")
-            }
-            if (minutes > 0 || (hours > 0)) {
-                if (minutes > 0) {
-                    builder.append(minutes).append("m")
-                }
-            }
-            if (builder.isEmpty() || seconds > 0) {
-                builder.append(seconds).append("s")
-            } else if (totalSeconds == 0L) {
-                return "0s"
-            }
-            if (builder.isEmpty()) "0s" else builder.toString()
+            return diffInMillis / 1000
         } else {
-            "parse_error"
+            throw IllegalArgumentException("Date parsing returned null")
         }
-    } catch (_: Exception) {
-        "calc_error"
+    } catch (e: Exception) {
+        throw IllegalArgumentException("Error calculating duration: ${e.message}")
     }
 }
