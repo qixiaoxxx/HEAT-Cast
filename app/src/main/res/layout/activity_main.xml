@@ -9,32 +9,64 @@
         android:background="@mipmap/tiffany_1920_empty"
         tools:context=".ui.MainActivity">
 
+        <ImageView
+            android:id="@+id/iv_wifi"
+            android:layout_width="40px"
+            android:layout_height="40px"
+            android:layout_marginStart="120px"
+            android:layout_marginTop="60px"
+            android:scaleType="fitXY"
+            android:src="@drawable/wifi_icon"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <TextView
             android:id="@+id/tv_wifi_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="120px"
-            android:layout_marginTop="60px"
-            android:drawableLeft="@drawable/icon_wifi_size"
-            android:drawablePadding="14px"
+            android:layout_marginStart="7dp"
             android:fontFamily="@font/source_han_sans_cn_medium"
             android:textColor="@color/cast_color_FFFFFF"
-            android:textSize="32px"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@id/iv_wifi"
+            app:layout_constraintStart_toEndOf="@id/iv_wifi"
+            app:layout_constraintTop_toTopOf="@id/iv_wifi" />
+
+
+        <ImageView
+            android:id="@+id/iv_device"
+            android:layout_width="40px"
+            android:layout_height="40px"
+            android:layout_marginStart="78dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/device_icon"
+            app:layout_constraintBottom_toBottomOf="@id/iv_wifi"
+            app:layout_constraintStart_toEndOf="@id/tv_wifi_name"
+            app:layout_constraintTop_toTopOf="@id/iv_wifi" />
 
         <TextView
             android:id="@+id/tv_device_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="156px"
-            android:drawableLeft="@drawable/icon_device_size"
-            android:drawablePadding="14px"
+            android:layout_marginStart="7dp"
             android:fontFamily="@font/source_han_sans_cn_medium"
             android:textColor="@color/cast_color_FFFFFF"
-            android:textSize="32px"
-            app:layout_constraintStart_toEndOf="@id/tv_wifi_name"
-            app:layout_constraintTop_toTopOf="@id/tv_wifi_name" />
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@+id/iv_device"
+            app:layout_constraintStart_toEndOf="@id/iv_device"
+            app:layout_constraintTop_toTopOf="@id/iv_device" />
+
+        <TextView
+            android:id="@+id/tv_version_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="78dp"
+            android:fontFamily="@font/source_han_sans_cn_medium"
+            android:textColor="@color/cast_color_FFFFFF"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@id/iv_wifi"
+            app:layout_constraintStart_toEndOf="@id/tv_device_name"
+            app:layout_constraintTop_toTopOf="@id/iv_wifi" />
 
         <TextView
             android:id="@+id/tv_mirroring_name"
@@ -59,19 +91,6 @@
             android:textSize="10px"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/tv_version_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="120px"
-            android:layout_marginBottom="60px"
-            android:drawablePadding="14px"
-            android:fontFamily="@font/source_han_sans_cn_medium"
-            android:textColor="@color/cast_color_FFFFFF"
-            android:textSize="32px"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

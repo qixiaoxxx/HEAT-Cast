@@ -2,6 +2,7 @@ package com.mcast.heat.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -40,12 +41,25 @@ import com.waxrain.droidsender.delegate.Global
 import com.waxrain.ui.WaxPlayer
 import com.waxrain.utils.Config
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
+import kotlin.apply
+import kotlin.compareTo
+import kotlin.inc
 import kotlin.system.exitProcess
 
 @AndroidEntryPoint
 class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
+    private companion object {
+        const val PREFS_NAME = "HeatCastPrefs"
+        const val KEY_FIRST_INSTALL_TIME = "first_install_time"
+        const val KEY_APP_OPEN_COUNT = "app_open_count"
+        const val USAGE_LIMIT_MONTHS = 3
+        const val USAGE_LIMIT_OPENS = 90
+    }
+
     private val mainViewModel by viewModels<MainViewModel>()
     private val wifiHelper: WifiHelper by lazy {
         WifiHelper(this)
@@ -89,14 +103,16 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
                 WaxPlayer.ACTION_CAST_URL_RECEIVED -> {
                     // 仅记录开始时间，不进行任何上报
                     castStartTime = getCurrentFormattedTime()
+                    Log.e("MainActivity", "ACTION_CAST_URL_RECEIVED")
                 }
 
                 WaxPlayer.ACTION_CAST_STOP -> {
+                    Log.e("MainActivity", "ACTION_CAST_STOP")
                     // 如果有开始时间，则计算时长并通知ViewModel更新聚合数据
                     castStartTime?.let { startTime ->
                         val stopTime = getCurrentFormattedTime()
                         try {
-                            // 【修改点】直接将开始和结束时间传递给 ViewModel
+                            // 直接将开始和结束时间传递给 ViewModel
                             mainViewModel.recordCompletedCast(startTime, stopTime)
                         } catch (e: Exception) {
                             Log.e("MainActivity", "Error processing cast duration.", e)
@@ -114,6 +130,13 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 检查使用限制
+        if (checkUsageLimits()) {
+            showUsageLimitDialog()
+            return
+        }
+
         // 确保在新版本首次启动时，旧的安装包被删除
         cleanupOldApks(this)
 
@@ -128,13 +151,21 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
             "${HeaderConfig.header_width_pixels_value}*${HeaderConfig.header_height_pixels_value}"
         mainViewModel.onSessionStart(this, resolution)
 
-        initSdk()
-        startSdk()
-        initView()
+        lifecycleScope.launch {
+            initialize()
+        }
         // 注册广播接收器
         registerCastReceiver()
         // 初始化检查新版本下载
         initUpdate()
+    }
+
+    private suspend fun initialize() {
+        withContext(Dispatchers.IO) {
+            initSdk()
+            startSdk()
+        }
+        initView()
     }
 
     fun initSdk() {
@@ -241,7 +272,7 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         if (WaxPlayService._config == null) WaxPlayService._config = Config(this)
 
         //自定义设备连接名称
-        WaxPlayService._config.nickName = getDeviceName()
+        WaxPlayService._config.nickName = getDeviceName(this)
         WaxPlayService._config.nickName_RMPF = 1
 
         if (Config.AIRMIRR_RESOLUTION != 0) WaxPlayService.amr = Config.AIRMIRR_RESOLUTION
@@ -448,7 +479,12 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
         val filter = IntentFilter()
         filter.addAction(WaxPlayer.ACTION_CAST_URL_RECEIVED)
         filter.addAction(WaxPlayer.ACTION_CAST_STOP)
-        registerReceiver(castStateReceiver, filter)
+        ContextCompat.registerReceiver(
+            this,
+            castStateReceiver,
+            filter,
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
     }
 
 
@@ -467,5 +503,50 @@ class MainActivity : BaseDataBindingActivity<ActivityMainBinding>() {
             Log.w("MainActivity", "Error unregistering castStateReceiver: ${e.message}")
         }
         super.onDestroy()
+    }
+
+    // 达到上限后弹窗显示
+    private fun showUsageLimitDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.app_name))
+            .setMessage(getString(R.string.app_name))
+            .setNeutralButton(getString(R.string.app_name)) { dialog, _ ->
+                dialog.dismiss()
+                finishAffinity()
+                exitProcess(0)
+            }
+            .setCancelable(false)
+            .create()
+            .show()
+    }
+
+    // 使用上限检查
+    private fun checkUsageLimits(): Boolean {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        var firstInstallTime = prefs.getLong(KEY_FIRST_INSTALL_TIME, 0L)
+        var appOpenCount = prefs.getInt(KEY_APP_OPEN_COUNT, 0)
+
+        if (firstInstallTime == 0L) {
+            // 首次启动，记录时间和启动次数
+            firstInstallTime = System.currentTimeMillis()
+            appOpenCount = 1
+            prefs.edit()
+                .putLong(KEY_FIRST_INSTALL_TIME, firstInstallTime)
+                .putInt(KEY_APP_OPEN_COUNT, appOpenCount)
+                .apply()
+            return false // 首次启动不阻止
+        } else {
+            // 后续启动，增加启动次数
+            appOpenCount++
+            prefs.edit().putInt(KEY_APP_OPEN_COUNT, appOpenCount).apply()
+        }
+
+        // 检查是否达到使用限制
+        val usageLimitMonthsInMillis = USAGE_LIMIT_MONTHS * 30L * 24 * 60 * 60 * 1000
+        val isTimeLimitReached =
+            (System.currentTimeMillis() - firstInstallTime) > usageLimitMonthsInMillis
+        val isOpensLimitReached = appOpenCount > USAGE_LIMIT_OPENS
+
+        return isTimeLimitReached || isOpensLimitReached
     }
 }
